@@ -14,6 +14,16 @@ Goal: portfolio piece + give to friends. Owner's PC: i5-9400F, RX 590 8 GB, 16 G
 - `ICEBOOST_SELFTEST=1` + run electron → prints `@@SELFTEST {json}`: sysinfo, live, processes, startup, tweaks, scan, registry write/read/delete on throwaway key `HKCU\Software\IceBoostSelfTest`, cleaning a temp folder. Touches nothing real.
 - `ICEBOOST_SHOTS=<dir>` (+ `ICEBOOST_PAGES`, `ICEBOOST_WAIT`) → saves PNG of each page, quits.
 - Run: `node_modules\electron\dist\electron.exe .` (or `... release\win-unpacked\resources\app.asar` for the packaged build)
+- Careful: these runs share `%APPDATA%\IceBoost` (localStorage: lang, XP, achievements) with the installed app. Restore anything you change (e.g. `lang` for EN screenshots).
+
+## Site (`site/`, separate package)
+- Landing page: Vite + React + Tailwind v4 + motion, same palette/font/mascot as the app. All text RU/EN in `site/src/i18n.ts`.
+- `npm run dev --prefix site` (port 5174, launch config "site" in `.claude/launch.json`), `npm run build --prefix site` → `site/dist`.
+- `site/src/config.ts`: VERSION + download links → GitHub Releases of `pashok3345u-netizen/ice-boost`, tag `v<version>`. Bump on every release.
+- Live at https://pashok3345u-netizen.github.io/ice-boost/ — `.github/workflows/pages.yml` rebuilds it on every push to `main` that touches `site/` (`SITE_BASE=/ice-boost/`). `og:url`/`og:image` in `site/index.html` are absolute — change them if the address changes.
+- Release = `npm run dist`, bump `VERSION` in `site/src/config.ts`, then `gh release create v<ver> release\IceBoost-Setup-<ver>.exe release\IceBoost-<ver>-portable.exe`.
+- Repo is public. Commits use the GitHub noreply email (local git config) — never the owner's real email.
+- Screenshots `site/public/shots/{ru,en}/*.webp` come from `ICEBOOST_SHOTS`. Don't use the Startup page: it shows the Windows username in paths.
 
 ## Layout
 - `src/main/ps.ts` — persistent PowerShell workers (stdin protocol, base64 lines, `@@` prefix); `runElevated` = one UAC prompt per call via temp .ps1 (direct if already admin)

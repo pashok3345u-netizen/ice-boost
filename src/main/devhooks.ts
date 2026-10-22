@@ -28,6 +28,11 @@ async function takeShots(win: BrowserWindow, dir: string): Promise<void> {
   for (const p of pages) {
     await win.webContents.executeJavaScript(`window.__iceGoto && window.__iceGoto(${JSON.stringify(p)})`)
     await sleep(2500)
+    // optional extra script, e.g. to click something before the screenshot
+    if (process.env.ICEBOOST_JS) {
+      await win.webContents.executeJavaScript(process.env.ICEBOOST_JS)
+      await sleep(900)
+    }
     const img = await win.webContents.capturePage()
     writeFileSync(join(dir, `${p}.png`), img.toPNG())
   }

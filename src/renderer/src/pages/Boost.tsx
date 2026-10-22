@@ -1,23 +1,27 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Gamepad2, Lightbulb, Lock, RefreshCw, RotateCcw, ShieldCheck, Sparkles, Undo2, X, Zap } from 'lucide-react'
+import { motion } from 'motion/react'
+import { Gamepad2, Lightbulb, Lock, RefreshCw, Rocket, RotateCcw, ShieldCheck, Sparkles, Undo2, X, Zap } from 'lucide-react'
 import { TWEAKS, TWEAK_GROUPS, type Tweak } from '../../../shared/tweaks'
 import type { ProcInfo } from '../../../shared/types'
 import { useStore } from '../store'
-import { Badge, Button, Card, Checkbox, Modal, PageHeader, Spinner, Toggle } from '../ui'
+import { useProgress } from '../progress'
+import { Badge, Button, Card, Checkbox, Modal, PageHeader, Skeleton, Spinner, Toggle } from '../ui'
 import { errText, fmtBytes } from '../format'
 import { CLOSEABLE } from '../catalog'
+import { burst } from '../Fx'
 
-type Pending = { ids: string[] } | null
+type Pending = { ids: string[]; at?: { x: number; y: number } } | null
 
 export function Boost(): ReactNode {
   const { t, i18n } = useTranslation()
   const lang = i18n.language
   const { tweaks, loadTweaks, restoreDone, setRestoreDone, toast, sys } = useStore()
+  const { track } = useProgress()
   const [busy, setBusy] = useState<Set<string>>(new Set())
   const [pending, setPending] = useState<Pending>(null)
   const [restoring, setRestoring] = useState(false)
-  const [bulk, setBulk] = useState<'revert' | null>(null)
+  const [reverting, setReverting] = useState(false)
 
   const stateOf = useCallback((id: string) => tweaks?.find((s) => s.id === id), [tweaks])
   const uac = t('common.uacDenied')
@@ -27,13 +31,17 @@ export function Boost(): ReactNode {
     if (bad) toast(errText(new Error(bad.error), uac), 'err')
   }
 
-  const apply = async (ids: string[]): Promise<void> => {
+  const apply = async (ids: string[], at?: { x: number; y: number }): Promise<void> => {
     setBusy((b) => new Set([...b, ...ids]))
     try {
       const res = await window.api.applyTweaks(ids)
       report(res)
       const ok = Object.values(res).filter((r) => r.ok).length
-      if (ok) toast(lang === 'ru' ? `Включено: ${ok}` : `Turned on: ${ok}`)
+      if (ok) {
+        toast(lang === 'ru' ? `Включено: ${ok}` : `Turned on: ${ok}`)
+        burst(at ? { ...at } : { big: ok > 3 })
+        track({ type: 'tweaks', count: ok })
+      }
     } catch (e) {
       toast(errText(e, uac), 'err')
     } finally {
@@ -71,10 +79,10 @@ export function Boost(): ReactNode {
   }
 
   // strong (system-wide) tweaks: offer a restore point first
-  const requestApply = (ids: string[]): void => {
+  const requestApply = (ids: string[], at?: { x: number; y: number }): void => {
     const strong = ids.some((id) => TWEAKS.find((tw) => tw.id === id)?.level === 'strong')
-    if (strong && !restoreDone) setPending({ ids })
-    else void apply(ids)
+    if (strong && !restoreDone) setPending({ ids, at })
+    else void apply(ids, at)
   }
 
   const recommendedTodo = useMemo(
@@ -82,10 +90,12 @@ export function Boost(): ReactNode {
     [stateOf]
   )
   const withBackup = useMemo(() => (tweaks ?? []).filter((s) => s.hasBackup).map((s) => s.id), [tweaks])
+  const appliedCount = (tweaks ?? []).filter((s) => s.applied).length
 
   return (
-    <div className="fade-up">
+    <div>
       <PageHeader
+        icon={<Rocket className="size-5" />}
         title={t('boost.title')}
         subtitle={t('boost.subtitle')}
         actions={
@@ -95,12 +105,12 @@ export function Boost(): ReactNode {
             </Button>
             <Button
               icon={<Undo2 className="size-4" />}
-              disabled={withBackup.length === 0 || bulk !== null}
-              loading={bulk === 'revert'}
+              disabled={withBackup.length === 0 || reverting}
+              loading={reverting}
               onClick={async () => {
-                setBulk('revert')
+                setReverting(true)
                 await revert(withBackup)
-                setBulk(null)
+                setReverting(false)
               }}
             >
               {t('boost.revertAll')}
@@ -108,7 +118,7 @@ export function Boost(): ReactNode {
             <Button
               variant="primary"
               icon={<Zap className="size-4" />}
-              disabled={recommendedTodo.length === 0 || bulk !== null}
+              disabled={recommendedTodo.length === 0 || busy.size > 0}
               loading={busy.size > 0 && recommendedTodo.every((id) => busy.has(id))}
               onClick={() => requestApply(recommendedTodo)}
             >
@@ -118,19 +128,36 @@ export function Boost(): ReactNode {
         }
       />
 
+      {tweaks && (
+        <Card className="mb-5 flex items-center gap-4 px-5 py-3.5">
+          <span className="font-display text-sm whitespace-nowrap text-muted">
+            <span className="text-lg font-semibold text-frost">{appliedCount}</span> / {TWEAKS.length}
+          </span>
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#3a3a43]">
+            <motion.div
+              className="accent-gradient h-full rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${(appliedCount / TWEAKS.length) * 100}%` }}
+              transition={{ type: 'spring', stiffness: 90, damping: 18 }}
+            />
+          </div>
+        </Card>
+      )}
+
       <div className="grid grid-cols-[minmax(0,1fr)_340px] gap-5">
         <div className="space-y-6">
-          {TWEAK_GROUPS.map((g) => (
+          {TWEAK_GROUPS.map((g, gi) => (
             <section key={g}>
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">{t(`boost.group.${g}`)}</h2>
+              <h2 className="font-display mb-3 text-xs font-semibold tracking-[0.18em] text-muted uppercase">{t(`boost.group.${g}`)}</h2>
               <div className="space-y-2">
-                {TWEAKS.filter((tw) => tw.group === g).map((tw) => (
+                {TWEAKS.filter((tw) => tw.group === g).map((tw, i) => (
                   <TweakRow
                     key={tw.id}
+                    delay={gi * 0.05 + i * 0.04}
                     tweak={tw}
                     applied={stateOf(tw.id)?.applied}
                     busy={busy.has(tw.id)}
-                    onChange={(on) => (on ? requestApply([tw.id]) : void revert([tw.id]))}
+                    onChange={(on, e) => (on ? requestApply([tw.id], { x: e.clientX, y: e.clientY }) : void revert([tw.id]))}
                   />
                 ))}
               </div>
@@ -140,17 +167,17 @@ export function Boost(): ReactNode {
 
         <div className="space-y-5">
           <BeforeGame />
-          <Card>
-            <h2 className="mb-3 flex items-center gap-2 font-semibold">
+          <Card delay={0.1}>
+            <h2 className="font-display mb-3 flex items-center gap-2 text-sm font-semibold">
               <Lightbulb className="size-4 text-warn" />
               {t('boost.tips')}
             </h2>
             <ul className="space-y-3 text-sm text-muted">
-              {['steam', 'discord', 'gpu', 'monitor', 'reboot'].map((k) => (
-                <li key={k} className="flex gap-2">
+              {['steam', 'discord', 'gpu', 'monitor', 'reboot'].map((k, i) => (
+                <motion.li key={k} className="flex gap-2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 + i * 0.06 }}>
                   <span className="mt-2 size-1.5 shrink-0 rounded-full bg-ice" />
                   <span>{t(`boost.tip.${k}`, { hz: sys?.refresh ?? 60 })}</span>
-                </li>
+                </motion.li>
               ))}
             </ul>
           </Card>
@@ -160,7 +187,7 @@ export function Boost(): ReactNode {
       <Modal open={pending !== null} onClose={() => setPending(null)}>
         <div className="mb-4 flex items-center gap-3">
           <ShieldCheck className="size-6 text-ice" />
-          <h2 className="font-semibold">{t('boost.restorePoint')}</h2>
+          <h2 className="font-display font-semibold">{t('boost.restorePoint')}</h2>
         </div>
         <p className="text-sm text-muted">{t('boost.confirmStrong')}</p>
         <div className="mt-6 flex justify-end gap-2">
@@ -169,9 +196,9 @@ export function Boost(): ReactNode {
           </Button>
           <Button
             onClick={() => {
-              const ids = pending!.ids
+              const p = pending!
               setPending(null)
-              void apply(ids)
+              void apply(p.ids, p.at)
             }}
           >
             {t('boost.applyWithout')}
@@ -180,10 +207,10 @@ export function Boost(): ReactNode {
             variant="primary"
             loading={restoring}
             onClick={async () => {
-              const ids = pending!.ids
+              const p = pending!
               const ok = await makeRestorePoint()
               setPending(null)
-              if (ok) void apply(ids)
+              if (ok) void apply(p.ids, p.at)
             }}
           >
             {t('boost.createAndApply')}
@@ -194,14 +221,22 @@ export function Boost(): ReactNode {
   )
 }
 
-function TweakRow({ tweak, applied, busy, onChange }: { tweak: Tweak; applied?: boolean; busy: boolean; onChange: (on: boolean) => void }): ReactNode {
+function TweakRow({
+  tweak, applied, busy, onChange, delay
+}: {
+  tweak: Tweak
+  applied?: boolean
+  busy: boolean
+  onChange: (on: boolean, e: React.MouseEvent) => void
+  delay: number
+}): ReactNode {
   const { t } = useTranslation()
   return (
-    <Card className="flex items-center gap-4 px-5 py-4">
+    <Card hover delay={delay} className={applied ? 'flex items-center gap-4 border-teal/50! px-5 py-4' : 'flex items-center gap-4 px-5 py-4'}>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-medium">{t(`boost.tweak.${tweak.id}.t`)}</span>
-          {tweak.level === 'strong' ? <Badge tone="violet">{t('boost.level.strong')}</Badge> : <Badge tone="good">{t('boost.level.safe')}</Badge>}
+          {tweak.level === 'strong' ? <Badge tone="warn">{t('boost.level.strong')}</Badge> : <Badge tone="good">{t('boost.level.safe')}</Badge>}
           {tweak.recommended && <Badge tone="ice" icon={<Sparkles className="size-3" />}>{t('boost.recommended')}</Badge>}
           {tweak.admin && <Badge icon={<Lock className="size-3" />}>{t('common.admin')}</Badge>}
           {tweak.restart !== 'none' && <Badge icon={<RotateCcw className="size-3" />}>{t(`common.restart.${tweak.restart}`)}</Badge>}
@@ -216,6 +251,7 @@ function TweakRow({ tweak, applied, busy, onChange }: { tweak: Tweak; applied?: 
 function BeforeGame(): ReactNode {
   const { t, i18n } = useTranslation()
   const { toast } = useStore()
+  const { track } = useProgress()
   const [procs, setProcs] = useState<ProcInfo[] | null>(null)
   const [picked, setPicked] = useState<Set<string>>(new Set())
   const [closing, setClosing] = useState(false)
@@ -247,14 +283,17 @@ function BeforeGame(): ReactNode {
     })
   }, [procs, i18n.language])
 
-  const close = async (): Promise<void> => {
+  const close = async (e: React.MouseEvent): Promise<void> => {
     const names = rows.filter((r) => picked.has(r.key)).flatMap((r) => r.procs)
+    const at = { x: e.clientX, y: e.clientY }
     setClosing(true)
     try {
       await window.api.closeApps(names)
       toast(t('boost.closed'))
-    } catch (e) {
-      toast(errText(e, t('common.uacDenied')), 'err')
+      burst(at)
+      track({ type: 'appsClosed' })
+    } catch (err) {
+      toast(errText(err, t('common.uacDenied')), 'err')
     } finally {
       setClosing(false)
       void load()
@@ -262,9 +301,9 @@ function BeforeGame(): ReactNode {
   }
 
   return (
-    <Card>
+    <Card delay={0.05} className="border-teal/40!">
       <div className="mb-1 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 font-semibold">
+        <h2 className="font-display flex items-center gap-2 text-sm font-semibold">
           <Gamepad2 className="size-4 text-ice" />
           {t('boost.before')}
         </h2>
@@ -272,29 +311,40 @@ function BeforeGame(): ReactNode {
       </div>
       <p className="mb-4 text-xs text-muted">{t('boost.beforeHint')}</p>
       {!procs ? (
-        <Spinner />
+        <div className="space-y-2">
+          <Skeleton className="h-8" />
+          <Skeleton className="h-8" />
+        </div>
       ) : rows.length === 0 ? (
         <p className="text-sm text-muted">{t('boost.nothingToClose')}</p>
       ) : (
         <>
-          <div className="space-y-2">
-            {rows.map((r) => (
-              <label key={r.key} className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-panel2">
+          <div className="space-y-1">
+            {rows.map((r, i) => (
+              <motion.label
+                key={r.key}
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-panel2"
+              >
                 <Checkbox
                   checked={picked.has(r.key)}
-                  onChange={(v) => setPicked((s) => {
-                    const n = new Set(s)
-                    if (v) n.add(r.key)
-                    else n.delete(r.key)
-                    return n
-                  })}
+                  onChange={(v) =>
+                    setPicked((s) => {
+                      const n = new Set(s)
+                      if (v) n.add(r.key)
+                      else n.delete(r.key)
+                      return n
+                    })
+                  }
                 />
                 <span className="flex-1 truncate text-sm">{r.label}</span>
-                <span className="text-xs tabular-nums text-muted">{fmtBytes(r.ram, i18n.language)}</span>
-              </label>
+                <span className="text-xs text-muted tabular-nums">{fmtBytes(r.ram, i18n.language)}</span>
+              </motion.label>
             ))}
           </div>
-          <Button className="mt-4 w-full" variant="danger" icon={<X className="size-4" />} loading={closing} disabled={picked.size === 0} onClick={() => void close()}>
+          <Button className="mt-4 w-full" variant="danger" icon={<X className="size-4" />} loading={closing} disabled={picked.size === 0} onClick={(e) => void close(e)}>
             {t('boost.closeSelected')}
           </Button>
         </>

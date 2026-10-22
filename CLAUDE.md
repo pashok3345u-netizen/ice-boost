@@ -24,7 +24,19 @@ Goal: portfolio piece + give to friends. Owner's PC: i5-9400F, RX 590 8 GB, 16 G
 - `src/shared/protected.ts` — processes that can never be killed
 - `src/renderer/src` — pages (Dashboard with health score + one-click, Boost, Cleaner, Startup, Processes, Settings), `i18n.ts` has all RU/EN text, `catalog.ts` startup hints + "close before game" apps
 
-## Status (2026-10-22, v0.1.0)
-- Built and self-tested on owner's PC (read paths + throwaway registry key + temp folder).
+## Design (v0.2)
+- Owner's palette: `#25252B` (bg), `#528A9A` (teal), `#D9E7E8` (frost); tokens in `styles.css` `@theme`, JS copies in `theme.ts`. Headings/numbers use the Unbounded font (`font-display`).
+- Animations via `motion` (`motion/react`): page transitions, nav pill (`layoutId`), springs. `Fx.tsx` = canvas snow + confetti bursts (`burst()`, `blizzard()`), ~30 fps, off via Settings → Effects.
+- `Mascot.tsx` = "Айсик" ice cube, mood from health score (melts when bad, sunglasses at 90+); 7 fast clicks (or 5 on the title-bar logo) = secret blizzard.
+- `progress.tsx` = XP / levels / 13 achievements in localStorage `iceboost.progress`; call `track({...})` after real actions.
+- `health.ts` = score + issues (shared by Dashboard, mascot, progress).
+- `ICEBOOST_JS=<code>` in shot mode runs JS before each screenshot (e.g. click the mascot).
+
+## Install
+- `npm run dist`, then `release\IceBoost-Setup-<ver>.exe` (per-user, no admin to install; `/S` = silent). Installs to `%LOCALAPPDATA%\Programs\IceBoost`, desktop + Start menu shortcuts, listed in Settings → Apps. Icon: `build/make-icon.ps1` → `icon.png` + multi-size `icon.ico`.
+- Window size/position saved in `%APPDATA%\IceBoost\window.json`.
+
+## Status (2026-10-22, v0.2.0, branch `redesign-ui`)
+- v0.2 installed on owner's PC (silent install, shortcuts verified). Self-test passes on the packaged build.
 - NOT yet verified on real settings: applying/undoing real tweaks, admin cleaning, restore point, UAC flows. First real run should be by the owner.
 - Exe is unsigned → SmartScreen warning for friends ("More info → Run anyway").

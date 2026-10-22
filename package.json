@@ -1,7 +1,7 @@
 {
   "name": "ice-boost",
   "productName": "IceBoost",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "IceBoost — PC optimizer for gamers",
   "author": "Aising",
   "private": true,
@@ -14,6 +14,7 @@
     "dist": "electron-vite build && electron-builder --win"
   },
   "devDependencies": {
+    "@fontsource-variable/unbounded": "^5.3.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
@@ -24,6 +25,7 @@
     "electron-vite": "^6.0.0",
     "i18next": "^26.5.5",
     "lucide-react": "^1.61.0",
+    "motion": "^14.6.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-i18next": "^17.1.1",
@@ -46,17 +48,37 @@
     ],
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] },
-        { "target": "portable", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
-      "icon": "build/icon.png",
+      "icon": "build/icon.ico",
       "requestedExecutionLevel": "requireAdministrator"
     },
     "nsis": {
       "oneClick": false,
+      "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
       "shortcutName": "IceBoost",
+      "uninstallDisplayName": "IceBoost",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "multiLanguageInstaller": true,
+      "installerLanguages": ["ru_RU", "en_US"],
+      "displayLanguageSelector": false,
       "artifactName": "IceBoost-Setup-${version}.exe"
     },
     "portable": {

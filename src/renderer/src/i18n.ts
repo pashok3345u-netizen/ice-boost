@@ -8,7 +8,72 @@ const ru = {
     cleaner: 'Очистка',
     startup: 'Автозагрузка',
     processes: 'Процессы',
+    achievements: 'Достижения',
     settings: 'Настройки'
+  },
+  mascot: {
+    name: 'Айсик',
+    bad: [
+      'Я таю… помоги ПК, нажми «Оптимизировать» 🥲',
+      'Тут столько мусора, что я в нём потерялся',
+      'Мне жарко. ПК тоже жарко. Давай чистить!'
+    ],
+    ok: ['Неплохо, но можно лучше 😏', 'Ещё пара кликов — и будет огонь… то есть лёд', 'Чуть-чуть подкрутим — и FPS скажет спасибо'],
+    good: ['Хорошо идём! Почти идеал ✨', 'ПК бодрый, я бодрый — красота', 'Осталось совсем немного до 90+'],
+    great: ['Я в очках, потому что ПК — топ 😎', 'Идеально. Иди играй!', 'Холоднее только в Антарктиде ❄️'],
+    any: [
+      'Перезагрузка — лучшее лекарство 🩹',
+      'Я слежу за процессором 👀',
+      'Ты знал, что я кубик льда? Теперь знаешь',
+      'Тыкни меня ещё… или не надо',
+      'Чем меньше автозагрузки — тем быстрее старт 🚀'
+    ],
+    secret: 'МЕТЕЛЬ!!! ❄️❄️❄️ Ты нашёл секрет!'
+  },
+  ach: {
+    pageTitle: 'Достижения',
+    subtitle: 'Оптимизируй ПК, получай опыт и повышай уровень. Чем больше заботишься о ПК — тем выше ранг.',
+    level: 'Уровень {{n}}',
+    xp: '{{a}} / {{b}} XP',
+    toNext: 'До следующего уровня: {{n}} XP',
+    unlocked: 'Достижение получено!',
+    levelUp: 'Новый уровень!',
+    locked: 'Секретное достижение',
+    lockedHint: 'Найди сам 😉',
+    done: 'Получено',
+    count: '{{a}} из {{b}}',
+    stats: {
+      freed: 'Освобождено всего',
+      cleans: 'Очисток',
+      tweaks: 'Включено настроек',
+      streak: 'Дней подряд'
+    },
+    howTo: 'Как получать опыт',
+    howList: ['Очистка — от 10 XP (больше мусора — больше опыта)', 'Каждая настройка — 15 XP', 'Оптимизация в 1 клик — 50 XP', 'Заходи каждый день — бонус растёт'],
+    titleLabel: 'Ранг',
+    title: {
+      newbie: 'Новичок',
+      cleaner: 'Чистильщик',
+      optimizer: 'Оптимизатор',
+      master: 'Мастер FPS',
+      guru: 'Ледяной гуру',
+      legend: 'Легенда IceBoost'
+    },
+    list: {
+      firstClean: { t: 'Первая уборка', d: 'Почисти мусор первый раз' },
+      gb1: { t: 'Гигабайт свободы', d: 'Освободи 1 ГБ' },
+      gb10: { t: 'Снежная лавина', d: 'Освободи 10 ГБ за всё время' },
+      firstTweak: { t: 'Первая настройка', d: 'Включи любую настройку для игр' },
+      allRec: { t: 'Полный разгон', d: 'Включи все рекомендованные настройки' },
+      oneClick: { t: 'Один клик', d: 'Используй «Оптимизировать в 1 клик»' },
+      startup3: { t: 'Укротитель автозагрузки', d: 'Выключи 3 программы в автозагрузке' },
+      gamer: { t: 'Готов к игре', d: 'Закрой лишние программы перед игрой' },
+      score90: { t: 'Идеальный ПК', d: 'Доведи состояние ПК до 90+' },
+      streak3: { t: 'Три дня подряд', d: 'Заходи в IceBoost 3 дня подряд' },
+      streak7: { t: 'Неделя заботы', d: 'Заходи 7 дней подряд' },
+      nightOwl: { t: 'Ночная сова', d: 'Открой IceBoost после полуночи' },
+      secret: { t: 'Секретная метель', d: 'Ты нашёл пасхалку!' }
+    }
   },
   common: {
     admin: 'Права админа',
@@ -28,6 +93,10 @@ const ru = {
     grade: { great: 'Отлично', good: 'Хорошо', ok: 'Можно лучше', bad: 'Нужна оптимизация' },
     oneClick: 'Оптимизировать в 1 клик',
     oneClickHint: 'Очистит мусор и включит рекомендованные настройки. Всё можно вернуть.',
+    gameTime: 'Я сажусь играть',
+    gameTimeDone: 'Закрыто программ: {{n}}. Удачной игры! 🎮',
+    gameTimeNothing: 'Лишнего ничего не запущено — можно играть! 🎮',
+    live: 'Нагрузка сейчас',
     issues: 'Что можно улучшить',
     noIssues: 'Всё отлично! Твой ПК в лучшей форме.',
     fix: 'Исправить',
@@ -183,6 +252,8 @@ const ru = {
   settings: {
     title: 'Настройки',
     language: 'Язык',
+    fx: 'Эффекты',
+    fxText: 'Падающий снег и конфетти. Почти не нагружают ПК, но их можно выключить.',
     about: 'О программе',
     aboutText: 'IceBoost — оптимизатор ПК для геймеров. Чистит мусор, настраивает Windows для игр и показывает, что тормозит компьютер.',
     honest: 'Честно: мы не делаем «очистку оперативки» и другие трюки, которые только выглядят полезными. Только то, что реально работает.',
@@ -200,7 +271,68 @@ const en: typeof ru = {
     cleaner: 'Cleaner',
     startup: 'Startup',
     processes: 'Processes',
+    achievements: 'Achievements',
     settings: 'Settings'
+  },
+  mascot: {
+    name: 'Icy',
+    bad: ['I’m melting… help your PC, hit “Optimize” 🥲', 'So much junk in here, I got lost', 'It’s hot. Your PC is hot too. Let’s clean!'],
+    ok: ['Not bad, could be better 😏', 'A couple more clicks and it’s fire… I mean ice', 'A little tuning and your FPS will thank you'],
+    good: ['Looking good! Almost perfect ✨', 'PC is fresh, I’m fresh — nice', 'Just a bit more to 90+'],
+    great: ['Sunglasses on, because your PC is top 😎', 'Perfect. Go play!', 'Only Antarctica is cooler ❄️'],
+    any: [
+      'A restart is the best medicine 🩹',
+      'I’m watching your CPU 👀',
+      'Did you know I’m an ice cube? Now you do',
+      'Poke me again… or don’t',
+      'Fewer startup apps — faster boot 🚀'
+    ],
+    secret: 'BLIZZARD!!! ❄️❄️❄️ You found the secret!'
+  },
+  ach: {
+    pageTitle: 'Achievements',
+    subtitle: 'Optimize your PC, earn XP and level up. The more you care for your PC, the higher your rank.',
+    level: 'Level {{n}}',
+    xp: '{{a}} / {{b}} XP',
+    toNext: 'To next level: {{n}} XP',
+    unlocked: 'Achievement unlocked!',
+    levelUp: 'Level up!',
+    locked: 'Secret achievement',
+    lockedHint: 'Find it yourself 😉',
+    done: 'Unlocked',
+    count: '{{a}} of {{b}}',
+    stats: {
+      freed: 'Freed in total',
+      cleans: 'Cleanups',
+      tweaks: 'Settings turned on',
+      streak: 'Day streak'
+    },
+    howTo: 'How to earn XP',
+    howList: ['Cleaning — 10+ XP (more junk, more XP)', 'Every setting — 15 XP', 'Optimize in 1 click — 50 XP', 'Come back every day — the bonus grows'],
+    titleLabel: 'Rank',
+    title: {
+      newbie: 'Newbie',
+      cleaner: 'Cleaner',
+      optimizer: 'Optimizer',
+      master: 'FPS Master',
+      guru: 'Ice Guru',
+      legend: 'IceBoost Legend'
+    },
+    list: {
+      firstClean: { t: 'First cleanup', d: 'Clean junk for the first time' },
+      gb1: { t: 'A gigabyte of freedom', d: 'Free up 1 GB' },
+      gb10: { t: 'Avalanche', d: 'Free up 10 GB in total' },
+      firstTweak: { t: 'First tweak', d: 'Turn on any gaming setting' },
+      allRec: { t: 'Full throttle', d: 'Turn on all recommended settings' },
+      oneClick: { t: 'One click', d: 'Use “Optimize in 1 click”' },
+      startup3: { t: 'Startup tamer', d: 'Turn off 3 startup apps' },
+      gamer: { t: 'Ready to play', d: 'Close unneeded apps before a game' },
+      score90: { t: 'Perfect PC', d: 'Get PC health to 90+' },
+      streak3: { t: 'Three days in a row', d: 'Open IceBoost 3 days in a row' },
+      streak7: { t: 'A week of care', d: 'Open it 7 days in a row' },
+      nightOwl: { t: 'Night owl', d: 'Open IceBoost after midnight' },
+      secret: { t: 'Secret blizzard', d: 'You found the easter egg!' }
+    }
   },
   common: {
     admin: 'Admin',
@@ -220,6 +352,10 @@ const en: typeof ru = {
     grade: { great: 'Excellent', good: 'Good', ok: 'Could be better', bad: 'Needs a boost' },
     oneClick: 'Optimize in 1 click',
     oneClickHint: 'Cleans junk and turns on recommended settings. Everything can be undone.',
+    gameTime: 'I’m going to play',
+    gameTimeDone: 'Apps closed: {{n}}. Have a good game! 🎮',
+    gameTimeNothing: 'Nothing unneeded is running — go play! 🎮',
+    live: 'Live load',
     issues: 'What can be improved',
     noIssues: 'All good! Your PC is in top shape.',
     fix: 'Fix',
@@ -375,6 +511,8 @@ const en: typeof ru = {
   settings: {
     title: 'Settings',
     language: 'Language',
+    fx: 'Effects',
+    fxText: 'Falling snow and confetti. They barely load your PC, but you can turn them off.',
     about: 'About',
     aboutText: 'IceBoost is a PC optimizer for gamers. It cleans junk, tunes Windows for games and shows what slows your PC down.',
     honest: 'Honestly: no “RAM cleaning” or other tricks that only look useful. Only things that really work.',

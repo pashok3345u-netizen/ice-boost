@@ -1,4 +1,5 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, screen, shell } from 'electron'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Api } from '../shared/types'
 import { getLive, getProcesses, getSystemInfo, killProcesses } from './system'
@@ -24,17 +25,43 @@ const handlers: Api = {
   createRestorePoint
 }
 
+// The window remembers its size and position between launches, like a normal app.
+type Bounds = { x?: number; y?: number; width: number; height: number; maximized?: boolean }
+
+function boundsFile(): string {
+  return join(app.getPath('userData'), 'window.json')
+}
+
+function loadBounds(): Bounds {
+  const fallback = { width: 1240, height: 820 }
+  try {
+    if (!existsSync(boundsFile())) return fallback
+    const b = JSON.parse(readFileSync(boundsFile(), 'utf8')) as Bounds
+    // only reuse the position if it is still on a connected monitor
+    const visible = screen.getAllDisplays().some((d) => {
+      const a = d.workArea
+      return b.x !== undefined && b.y !== undefined && b.x + 100 > a.x && b.x < a.x + a.width - 100 && b.y >= a.y - 10 && b.y < a.y + a.height - 100
+    })
+    return visible ? b : { width: b.width, height: b.height, maximized: b.maximized }
+  } catch {
+    return fallback
+  }
+}
+
 function createWindow(): BrowserWindow {
+  const b = loadBounds()
   const win = new BrowserWindow({
-    width: 1220,
-    height: 800,
-    minWidth: 1020,
-    minHeight: 680,
+    x: b.x,
+    y: b.y,
+    width: b.width,
+    height: b.height,
+    minWidth: 1060,
+    minHeight: 700,
     show: false,
     title: 'IceBoost',
-    backgroundColor: '#070b16',
+    backgroundColor: '#1D1D22',
     titleBarStyle: 'hidden',
-    titleBarOverlay: { color: '#070b16', symbolColor: '#94a3b8', height: 40 },
+    titleBarOverlay: { color: '#1D1D22', symbolColor: '#D9E7E8', height: 40 },
     autoHideMenuBar: true,
     icon: join(__dirname, '../../build/icon.png'),
     webPreferences: {
@@ -43,7 +70,17 @@ function createWindow(): BrowserWindow {
       contextIsolation: true
     }
   })
-  win.once('ready-to-show', () => win.show())
+  win.once('ready-to-show', () => {
+    if (b.maximized) win.maximize()
+    win.show()
+  })
+  win.on('close', () => {
+    try {
+      writeFileSync(boundsFile(), JSON.stringify({ ...win.getNormalBounds(), maximized: win.isMaximized() }))
+    } catch {
+      // not important
+    }
+  })
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https://')) void shell.openExternal(url)
     return { action: 'deny' }

@@ -48,5 +48,6 @@ Goal: portfolio piece + give to friends. Owner's PC: i5-9400F, RX 590 8 GB, 16 G
 
 ## Status (2026-10-22, v0.2.0, on `main`)
 - v0.2 installed on owner's PC (silent install, shortcuts verified). Self-test passes on the packaged build.
+- Public: repo github.com/pashok3345u-netizen/ice-boost, release v0.2.0 (setup + portable exe), site live on GitHub Pages.
 - NOT yet verified on real settings: applying/undoing real tweaks, admin cleaning, restore point, UAC flows. First real run should be by the owner.
 - Exe is unsigned → SmartScreen warning for friends ("More info → Run anyway").

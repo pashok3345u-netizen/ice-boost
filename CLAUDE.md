@@ -36,7 +36,7 @@ Goal: portfolio piece + give to friends. Owner's PC: i5-9400F, RX 590 8 GB, 16 G
 - `npm run dist`, then `release\IceBoost-Setup-<ver>.exe` (per-user, no admin to install; `/S` = silent). Installs to `%LOCALAPPDATA%\Programs\IceBoost`, desktop + Start menu shortcuts, listed in Settings → Apps. Icon: `build/make-icon.ps1` → `icon.png` + multi-size `icon.ico`.
 - Window size/position saved in `%APPDATA%\IceBoost\window.json`.
 
-## Status (2026-10-22, v0.2.0, branch `redesign-ui`)
+## Status (2026-10-22, v0.2.0, on `main`)
 - v0.2 installed on owner's PC (silent install, shortcuts verified). Self-test passes on the packaged build.
 - NOT yet verified on real settings: applying/undoing real tweaks, admin cleaning, restore point, UAC flows. First real run should be by the owner.
 - Exe is unsigned → SmartScreen warning for friends ("More info → Run anyway").

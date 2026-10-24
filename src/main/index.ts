@@ -7,11 +7,14 @@ import { cleanJunk, scanJunk } from './cleaner'
 import { getStartup, setStartup } from './startup'
 import { applyTweaks, createRestorePoint, getTweaks, revertTweaks } from './tweaks'
 import { disposePs } from './ps'
+import { getGpu, resetGpuMax, startGpuWatch, stopGpuWatch } from './gpu'
 import { runDevHooks } from './devhooks'
 
 const handlers: Api = {
   getSystemInfo,
   getLive,
+  getGpu,
+  resetGpuMax,
   getProcesses,
   killProcess: (name) => killProcesses([name]),
   closeApps: killProcesses,
@@ -114,10 +117,12 @@ if (!app.requestSingleInstanceLock()) {
 
   app.whenReady().then(() => {
     const win = createWindow()
+    startGpuWatch()
     runDevHooks(win)
   })
 
   app.on('window-all-closed', () => {
+    stopGpuWatch()
     disposePs()
     app.quit()
   })

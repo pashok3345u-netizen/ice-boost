@@ -67,7 +67,7 @@ function Row({ icon, label, value, delay }: { icon: ReactNode; label: string; va
 export function Dashboard(): ReactNode {
   const { t, i18n } = useTranslation()
   const lang = i18n.language
-  const { sys, live, history, go } = useStore()
+  const { sys, live, history, gpu, go } = useStore()
   const { score, issues, ready } = useHealth()
   const [running, setRunning] = useState(false)
   const [gaming, setGaming] = useState(false)
@@ -186,7 +186,12 @@ export function Dashboard(): ReactNode {
           title={t('dash.gpu')}
           value={live?.gpu != null ? Math.round(live.gpu) : null}
           suffix="%"
-          sub={live?.vramUsed != null && sys ? t('dash.of', { a: fmtBytes(live.vramUsed, lang), b: fmtBytes(sys.vram, lang) }) : ''}
+          sub={[
+            gpu?.now?.temp != null ? `${Math.round(gpu.now.temp)}°C` : '',
+            live?.vramUsed != null && sys ? t('dash.of', { a: fmtBytes(live.vramUsed, lang), b: fmtBytes(sys.vram, lang) }) : ''
+          ]
+            .filter(Boolean)
+            .join(' · ')}
           data={history.gpu}
           color={C.good}
         />

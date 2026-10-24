@@ -4,6 +4,7 @@ import { initReactI18next } from 'react-i18next'
 const ru = {
   nav: {
     dashboard: 'Главная',
+    gpu: 'Видеокарта',
     boost: 'Ускорение игр',
     cleaner: 'Очистка',
     startup: 'Автозагрузка',
@@ -120,7 +121,13 @@ const ru = {
       startup: '{{n}} лишних программ в автозагрузке',
       tweaks: '{{n}} настроек для игр не включены',
       ram: 'Память почти заполнена ({{p}}%)',
-      uptime: 'ПК не перезагружался {{d}} дн. — перезагрузка освежит систему'
+      uptime: 'ПК не перезагружался {{d}} дн. — перезагрузка освежит систему',
+      gpu: {
+        temp: 'Видеокарта горячая: {{v}}°C',
+        hotspot: 'Чип видеокарты перегревается: {{v}}°C',
+        volt: 'Напряжение видеокарты слишком высокое: {{v}} В',
+        fan: 'Вентилятор видеокарты не крутится ({{v}}°C)'
+      }
     },
     run: {
       title: 'Оптимизация',
@@ -237,6 +244,64 @@ const ru = {
       extra: 'Не нужно для работы Windows.'
     }
   },
+  gpu: {
+    title: 'Видеокарта',
+    subtitle: 'Температура, напряжение и вентилятор — в реальном времени. Если станет опасно, IceBoost сразу предупредит, даже когда окно свёрнуто.',
+    status: { ok: 'Всё в норме', warm: 'Карта тёплая', hot: 'Горячо!', danger: 'Опасно!' },
+    statusText: {
+      ok: 'Температура и напряжение в безопасных пределах. Можно спокойно играть.',
+      warm: 'Для игр это нормально. Главное — чтобы не было выше {{hot}}°C.',
+      hot: 'Карта работает на пределе. Долго так лучше не играть.',
+      danger: 'Карта может перегреться и сломаться. Выйди из игры и дай ей остыть.'
+    },
+    alert: {
+      temp: 'Температура {{v}}°C',
+      hotspot: 'Горячая точка чипа {{v}}°C',
+      volt: 'Напряжение {{v}} В — выше заводского',
+      fan: 'Вентилятор не крутится, а карта уже {{v}}°C'
+    },
+    tips: 'Что делать',
+    tipList: [
+      'Почисти видеокарту и корпус от пыли',
+      'Проверь, что все вентиляторы крутятся',
+      'Сбрось разгон в AMD Software или NVIDIA App',
+      'Поставь ограничение FPS в игре — карта будет меньше греться'
+    ],
+    temp: 'Температура',
+    voltage: 'Напряжение',
+    load: 'Нагрузка',
+    core: 'Частота ядра',
+    mem: 'Частота памяти',
+    fan: 'Вентилятор',
+    power: 'Потребление',
+    fanRest: 'Отдыхает',
+    fanRestHint: 'Карта холодная — это нормально',
+    fanStuck: 'Не крутится!',
+    rpm: 'об/мин',
+    mhz: 'МГц',
+    watt: 'Вт',
+    volt: 'В',
+    limit: 'Предел драйвера: {{v}}°C',
+    hotspotNow: 'Горячая точка: {{v}}°C',
+    voltNote: 'Норма: до {{v}} В',
+    noVolt: 'Эта видеокарта не сообщает напряжение (у NVIDIA его не прочитать без сторонних программ)',
+    peaks: 'Максимум за сеанс',
+    peaksHint: 'Сыграй катку и загляни сюда — увидишь, до скольки грелась карта.',
+    reset: 'Сбросить',
+    scale: 'Что значат цифры',
+    scaleTemp: [
+      'до {{warm}}°C — холодная, всё отлично',
+      '{{warm}}–{{hot}}°C — нормально для игр',
+      '{{hot}}–{{danger}}°C — горячо: пора чистить от пыли',
+      'выше {{danger}}°C — опасно, выйди из игры'
+    ],
+    scaleVolt: 'Напряжение карта меняет сама: в простое около 0,75 В, в игре до ~1,15 В. Выше {{v}} В бывает только при ручном разгоне — это вредно для карты.',
+    notify: 'Предупреждения Windows',
+    notifyText: 'Если карта начнёт перегреваться, IceBoost покажет уведомление Windows. Во время игры не закрывай IceBoost — просто сверни.',
+    unsupported: 'Не получилось прочитать датчики',
+    unsupportedText: 'IceBoost читает датчики видеокарт AMD Radeon и NVIDIA GeForce. Если у тебя одна из них — обнови драйвер.',
+    waiting: 'Читаю датчики…'
+  },
   procs: {
     title: 'Процессы',
     subtitle: 'Что сейчас ест процессор и память. Обновляется каждые 3 секунды.',
@@ -267,6 +332,7 @@ const ru = {
 const en: typeof ru = {
   nav: {
     dashboard: 'Dashboard',
+    gpu: 'GPU Monitor',
     boost: 'Game Boost',
     cleaner: 'Cleaner',
     startup: 'Startup',
@@ -379,7 +445,13 @@ const en: typeof ru = {
       startup: '{{n}} unneeded apps start with Windows',
       tweaks: '{{n}} gaming settings are off',
       ram: 'Memory is almost full ({{p}}%)',
-      uptime: 'PC hasn’t restarted in {{d}} days — a restart will refresh it'
+      uptime: 'PC hasn’t restarted in {{d}} days — a restart will refresh it',
+      gpu: {
+        temp: 'Graphics card is hot: {{v}}°C',
+        hotspot: 'Graphics chip is overheating: {{v}}°C',
+        volt: 'Graphics card voltage is too high: {{v}} V',
+        fan: 'Graphics card fan isn’t spinning ({{v}}°C)'
+      }
     },
     run: {
       title: 'Optimizing',
@@ -495,6 +567,64 @@ const en: typeof ru = {
       printer: 'Printer. Turn it off if you rarely print.',
       extra: 'Not needed for Windows to work.'
     }
+  },
+  gpu: {
+    title: 'GPU Monitor',
+    subtitle: 'Temperature, voltage and fan in real time. If it gets dangerous, IceBoost warns you right away — even when the window is minimized.',
+    status: { ok: 'All good', warm: 'Running warm', hot: 'Hot!', danger: 'Danger!' },
+    statusText: {
+      ok: 'Temperature and voltage are in the safe range. Game on.',
+      warm: 'That’s normal for games. Just keep it below {{hot}}°C.',
+      hot: 'The card is at its limit. Better not play like this for long.',
+      danger: 'The card can overheat and break. Quit the game and let it cool down.'
+    },
+    alert: {
+      temp: 'Temperature {{v}}°C',
+      hotspot: 'Chip hotspot {{v}}°C',
+      volt: 'Voltage {{v}} V — above stock',
+      fan: 'The fan isn’t spinning, and the card is already {{v}}°C'
+    },
+    tips: 'What to do',
+    tipList: [
+      'Clean the dust out of the card and the case',
+      'Check that all fans spin',
+      'Reset the overclock in AMD Software or NVIDIA App',
+      'Cap the FPS in the game — the card will run cooler'
+    ],
+    temp: 'Temperature',
+    voltage: 'Voltage',
+    load: 'Load',
+    core: 'Core clock',
+    mem: 'Memory clock',
+    fan: 'Fan',
+    power: 'Power',
+    fanRest: 'Resting',
+    fanRestHint: 'The card is cool — that’s normal',
+    fanStuck: 'Not spinning!',
+    rpm: 'RPM',
+    mhz: 'MHz',
+    watt: 'W',
+    volt: 'V',
+    limit: 'Driver limit: {{v}}°C',
+    hotspotNow: 'Hotspot: {{v}}°C',
+    voltNote: 'Normal: up to {{v}} V',
+    noVolt: 'This card doesn’t report its voltage (NVIDIA doesn’t share it without third-party tools)',
+    peaks: 'Session peaks',
+    peaksHint: 'Play a match and come back — you’ll see how hot the card got.',
+    reset: 'Reset',
+    scale: 'What the numbers mean',
+    scaleTemp: [
+      'below {{warm}}°C — cool, all good',
+      '{{warm}}–{{hot}}°C — normal for games',
+      '{{hot}}–{{danger}}°C — hot: time to clean the dust',
+      'above {{danger}}°C — dangerous, quit the game'
+    ],
+    scaleVolt: 'The card changes its voltage by itself: about 0.75 V at idle, up to ~1.15 V in games. Above {{v}} V only happens with manual overclocking — that’s bad for the card.',
+    notify: 'Windows alerts',
+    notifyText: 'If the card starts to overheat, IceBoost shows a Windows notification. Don’t close IceBoost while gaming — just minimize it.',
+    unsupported: 'Couldn’t read the sensors',
+    unsupportedText: 'IceBoost reads sensors of AMD Radeon and NVIDIA GeForce cards. If you have one of them, update the driver.',
+    waiting: 'Reading sensors…'
   },
   procs: {
     title: 'Processes',

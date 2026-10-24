@@ -1,7 +1,8 @@
 import { useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'motion/react'
-import { Activity, CircleCheck, CircleX, Gauge, Info, Power, Rocket, Settings as SettingsIcon, Sparkles, Trophy } from 'lucide-react'
+import { Activity, CircleCheck, CircleX, Gauge, Gpu as GpuIcon, Info, Power, Rocket, Settings as SettingsIcon, Sparkles, Trophy } from 'lucide-react'
+import { checkGpu, tempLevel } from '../../shared/gpu'
 import { StoreProvider, useStore, type Page } from './store'
 import { ProgressProvider, useProgress, levelOf, titleKey, ACHIEVEMENTS } from './progress'
 import { useHealth } from './health'
@@ -9,6 +10,7 @@ import { Badge, Logo, cx } from './ui'
 import { BurstLayer, SnowBackground, blizzard } from './Fx'
 import { MascotMini } from './Mascot'
 import { Dashboard } from './pages/Dashboard'
+import { Gpu, LEVEL_COLOR } from './pages/Gpu'
 import { Boost } from './pages/Boost'
 import { Cleaner } from './pages/Cleaner'
 import { Startup } from './pages/Startup'
@@ -18,6 +20,7 @@ import { Settings } from './pages/Settings'
 
 const NAV: { id: Page; icon: ReactNode }[] = [
   { id: 'dashboard', icon: <Gauge className="size-[18px]" /> },
+  { id: 'gpu', icon: <GpuIcon className="size-[18px]" /> },
   { id: 'boost', icon: <Rocket className="size-[18px]" /> },
   { id: 'cleaner', icon: <Sparkles className="size-[18px]" /> },
   { id: 'startup', icon: <Power className="size-[18px]" /> },
@@ -28,6 +31,7 @@ const NAV: { id: Page; icon: ReactNode }[] = [
 
 const PAGES: Record<Page, () => ReactNode> = {
   dashboard: Dashboard,
+  gpu: Gpu,
   boost: Boost,
   cleaner: Cleaner,
   startup: Startup,
@@ -85,10 +89,18 @@ function Profile(): ReactNode {
 
 function Shell(): ReactNode {
   const { t } = useTranslation()
-  const { page, go, sys, toasts } = useStore()
+  const { page, go, sys, gpu, toasts } = useStore()
   const { track } = useProgress()
   const logoClicks = useRef<number[]>([])
   const PageView = PAGES[page]
+  // GPU temperature right in the menu; blinks when the card is hot
+  const gpuNow = gpu?.now
+  const gpuLevel = gpuNow ? checkGpu(gpuNow).level : 'ok'
+  const gpuAlarm = gpuLevel === 'hot' || gpuLevel === 'danger'
+  const gpuTemp =
+    gpuNow?.temp != null
+      ? { v: Math.round(gpuNow.temp), color: gpuAlarm ? LEVEL_COLOR[gpuLevel] : LEVEL_COLOR[tempLevel(gpuNow.temp, gpuNow.maxTemp)] }
+      : null
 
   // easter egg: click the logo 5 times fast
   const onLogo = (): void => {
@@ -108,7 +120,7 @@ function Shell(): ReactNode {
           <Logo size={20} />
         </motion.button>
         <span className="font-display text-[13px] font-semibold tracking-wide">IceBoost</span>
-        <span className="text-[11px] text-muted">v0.2</span>
+        <span className="text-[11px] text-muted">v0.3</span>
         {sys && (
           <span className="ml-2">
             <Badge tone={sys.isAdmin ? 'good' : 'muted'}>{sys.isAdmin ? t('common.adminOn') : t('common.adminOff')}</Badge>
@@ -140,6 +152,15 @@ function Shell(): ReactNode {
               )}
               <span className={cx('relative', page === n.id && 'text-ice')}>{n.icon}</span>
               <span className="relative">{t(`nav.${n.id}`)}</span>
+              {n.id === 'gpu' && gpuTemp && (
+                <span
+                  className={cx('relative ml-auto flex items-center gap-1.5 text-xs font-medium tabular-nums', gpuAlarm && 'animate-pulse')}
+                  style={{ color: gpuTemp.color }}
+                >
+                  {gpuAlarm && <span className="size-1.5 rounded-full bg-current" />}
+                  {gpuTemp.v}°
+                </span>
+              )}
             </motion.button>
           ))}
           <Profile />

@@ -4,6 +4,8 @@ import type { Api } from '../shared/types'
 const methods: (keyof Api)[] = [
   'getSystemInfo',
   'getLive',
+  'getGpu',
+  'resetGpuMax',
   'getProcesses',
   'killProcess',
   'closeApps',

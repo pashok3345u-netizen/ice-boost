@@ -2,6 +2,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TWEAKS } from '../../shared/tweaks'
+import { checkGpu } from '../../shared/gpu'
 import { useStore, type Page } from './store'
 import { fmtBytes, pct } from './format'
 import { startupHint } from './catalog'
@@ -14,11 +15,19 @@ export interface Issue {
 }
 
 export function useHealth(): { score: number; issues: Issue[]; ready: boolean } {
-  const { live, junk, startup, tweaks } = useStore()
+  const { live, junk, startup, tweaks, gpu } = useStore()
   const { t, i18n } = useTranslation()
   return useMemo(() => {
     const lang = i18n.language
     const issues: Issue[] = []
+    const g = gpu?.now
+    if (g) {
+      for (const a of checkGpu(g).alerts) {
+        const v = a.id === 'volt' ? (g.voltage ?? 0).toFixed(3) : Math.round((a.id === 'hotspot' ? g.hotspot : g.temp) ?? 0)
+        const text = t(`dash.issue.gpu.${a.id}`, { v: lang === 'ru' ? String(v).replace('.', ',') : v })
+        issues.push({ key: `gpu-${a.id}`, text, penalty: a.level === 'danger' ? 30 : 12, page: 'gpu' })
+      }
+    }
     const drive = 'C:'
     if (live && live.diskTotal > 0) {
       const ratio = live.diskFree / live.diskTotal
@@ -48,7 +57,7 @@ export function useHealth(): { score: number; issues: Issue[]; ready: boolean } 
     }
     const score = Math.max(5, 100 - issues.reduce((s, i) => s + i.penalty, 0))
     return { score, issues: issues.sort((a, b) => b.penalty - a.penalty), ready: !!(live && junk && startup && tweaks) }
-  }, [live, junk, startup, tweaks, t, i18n.language])
+  }, [live, junk, startup, tweaks, gpu, t, i18n.language])
 }
 
 export type Mood = 'bad' | 'ok' | 'good' | 'great'

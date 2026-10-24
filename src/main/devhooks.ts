@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os'
 import { getLive, getProcesses, getSystemInfo } from './system'
 import { scanJunk, _cleanFolder } from './cleaner'
 import { getStartup } from './startup'
+import { getGpu } from './gpu'
 import { getTweaks, _readOps, _writeOps } from './tweaks'
 import { taskPs } from './ps'
 
@@ -23,7 +24,7 @@ async function takeShots(win: BrowserWindow, dir: string): Promise<void> {
   mkdirSync(dir, { recursive: true })
   win.webContents.setBackgroundThrottling(false)
   await new Promise<void>((r) => win.webContents.once('did-finish-load', () => r()))
-  const pages = (process.env.ICEBOOST_PAGES ?? 'dashboard,boost,cleaner,startup,processes,settings').split(',')
+  const pages = (process.env.ICEBOOST_PAGES ?? 'dashboard,gpu,boost,cleaner,startup,processes,settings').split(',')
   await sleep(Number(process.env.ICEBOOST_WAIT ?? 9000))
   for (const p of pages) {
     await win.webContents.executeJavaScript(`window.__iceGoto && window.__iceGoto(${JSON.stringify(p)})`)
@@ -62,6 +63,7 @@ async function selfTest(): Promise<void> {
   await step('procs1', async () => (await getProcesses()).length, out)
   await sleep(1500)
   await step('live2', getLive, out)
+  await step('gpu', async () => (await getGpu()).now, out)
   await step('procs2', async () => (await getProcesses()).slice(0, 5), out)
   await step('startup', getStartup, out)
   await step('tweaks', getTweaks, out)

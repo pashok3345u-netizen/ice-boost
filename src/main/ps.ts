@@ -152,10 +152,13 @@ class PsWorker {
 export const monitorPs = new PsWorker()
 /** For everything else (cleaning, tweaks, startup...). */
 export const taskPs = new PsWorker()
+/** For the video card sensors — asked every 2 s, so it gets its own process. */
+export const sensorPs = new PsWorker()
 
 export function disposePs(): void {
   monitorPs.dispose()
   taskPs.dispose()
+  sensorPs.dispose()
 }
 
 /** Embeds a JS value into a script as a PowerShell object. */

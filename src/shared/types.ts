@@ -97,9 +97,43 @@ export interface RestorePointResult {
   error?: string
 }
 
+/** One reading of the video card sensors. null = this card doesn't report it. */
+export interface GpuSensors {
+  vendor: 'amd' | 'nvidia'
+  name: string
+  /** °C */
+  temp: number | null
+  /** °C, the hottest point of the chip (newer cards only) */
+  hotspot: number | null
+  /** V, core voltage */
+  voltage: number | null
+  /** MHz */
+  core: number | null
+  /** MHz */
+  mem: number | null
+  fanRpm: number | null
+  fanPct: number | null
+  /** W */
+  power: number | null
+  /** °C, the limit the driver itself reports (90 on RX 590) */
+  maxTemp: number | null
+}
+
+export interface GpuState {
+  /** false = no sensors could be read on this PC */
+  supported: boolean
+  now: GpuSensors | null
+  /** last 5 minutes, one point every 2 s */
+  history: { temp: number[]; voltage: number[]; power: number[] }
+  /** highest values since IceBoost started (or since "Reset") */
+  max: { temp: number | null; hotspot: number | null; voltage: number | null; power: number | null }
+}
+
 export interface Api {
   getSystemInfo(): Promise<SystemInfo>
   getLive(): Promise<LiveStats>
+  getGpu(): Promise<GpuState>
+  resetGpuMax(): Promise<void>
   getProcesses(): Promise<ProcInfo[]>
   killProcess(name: string): Promise<OpResult>
   closeApps(names: string[]): Promise<OpResult>

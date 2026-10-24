@@ -1,6 +1,6 @@
 // Things to change for every new release of the app.
-export const VERSION = '0.2.0'
-export const SIZE_MB = 110
+export const VERSION = '0.3.0'
+export const SIZE_MB = 107
 
 // The .exe files are too big for the site itself, so they live on GitHub Releases.
 const RELEASES = 'https://github.com/pashok3345u-netizen/ice-boost/releases'

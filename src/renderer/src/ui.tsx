@@ -211,14 +211,16 @@ export function Ring({ value, size = 180, stroke = 14, children }: { value: numb
   )
 }
 
-export function Sparkline({ data, color, max = 100, height = 44 }: { data: number[]; color: string; max?: number; height?: number }): ReactNode {
+export function Sparkline({
+  data, color, min = 0, max = 100, height = 44, points = 60
+}: { data: number[]; color: string; min?: number; max?: number; height?: number; points?: number }): ReactNode {
   const w = 200
-  const n = 60
+  const n = points
   const pts = data.slice(-n)
   if (pts.length < 2) return <div style={{ height }} />
   const step = w / (n - 1)
   const off = (n - pts.length) * step
-  const y = (v: number): number => height - 3 - (Math.min(max, Math.max(0, v)) / max) * (height - 6)
+  const y = (v: number): number => height - 3 - ((Math.min(max, Math.max(min, v)) - min) / (max - min)) * (height - 6)
   const line = pts.map((v, i) => `${(off + i * step).toFixed(1)},${y(v).toFixed(1)}`).join(' ')
   const last = pts[pts.length - 1]
   const id = `g${color.replace('#', '')}`

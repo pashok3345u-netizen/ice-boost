@@ -1,8 +1,8 @@
 // App-wide data: PC info, live load, scan results, startup list and tweak states.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { JunkResult, LiveStats, StartupItem, SystemInfo, TweakState } from '../../shared/types'
+import type { GpuState, JunkResult, LiveStats, StartupItem, SystemInfo, TweakState } from '../../shared/types'
 
-export type Page = 'dashboard' | 'boost' | 'cleaner' | 'startup' | 'processes' | 'achievements' | 'settings'
+export type Page = 'dashboard' | 'gpu' | 'boost' | 'cleaner' | 'startup' | 'processes' | 'achievements' | 'settings'
 export type ToastKind = 'ok' | 'err' | 'info'
 
 interface Toast {
@@ -17,6 +17,9 @@ interface Store {
   sys: SystemInfo | null
   live: LiveStats | null
   history: { cpu: number[]; ram: number[]; gpu: number[] }
+  /** video card sensors (temperature, voltage...) */
+  gpu: GpuState | null
+  resetGpuMax: () => Promise<void>
   junk: JunkResult[] | null
   scanning: boolean
   scan: () => Promise<void>
@@ -45,6 +48,7 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactNode 
   const [sys, setSys] = useState<SystemInfo | null>(null)
   const [live, setLive] = useState<LiveStats | null>(null)
   const [history, setHistory] = useState({ cpu: [] as number[], ram: [] as number[], gpu: [] as number[] })
+  const [gpu, setGpu] = useState<GpuState | null>(null)
   const [junk, setJunk] = useState<JunkResult[] | null>(null)
   const [scanning, setScanning] = useState(false)
   const [startup, setStartup] = useState<StartupItem[] | null>(null)
@@ -102,6 +106,11 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactNode 
   useEffect(() => {
     let alive = true
     const tick = async (): Promise<void> => {
+      // the main process reads the sensors by itself, this only picks up the latest values
+      window.api
+        .getGpu()
+        .then((g) => alive && setGpu(g))
+        .catch(() => {})
       try {
         const l = await window.api.getLive()
         if (!alive) return
@@ -123,6 +132,11 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactNode 
     }
   }, [])
 
+  const resetGpuMax = useCallback(async () => {
+    await window.api.resetGpuMax()
+    setGpu(await window.api.getGpu())
+  }, [])
+
   const go = useCallback((p: Page) => setPage(p), [])
   useEffect(() => {
     window.__iceGoto = (p: string) => setPage(p as Page)
@@ -130,10 +144,10 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactNode 
 
   const value = useMemo<Store>(
     () => ({
-      page, go, sys, live, history, junk, scanning, scan, startup, loadStartup, tweaks, loadTweaks,
+      page, go, sys, live, history, gpu, resetGpuMax, junk, scanning, scan, startup, loadStartup, tweaks, loadTweaks,
       restoreDone, setRestoreDone, toasts, toast
     }),
-    [page, go, sys, live, history, junk, scanning, scan, startup, loadStartup, tweaks, loadTweaks, restoreDone, toasts, toast]
+    [page, go, sys, live, history, gpu, resetGpuMax, junk, scanning, scan, startup, loadStartup, tweaks, loadTweaks, restoreDone, toasts, toast]
   )
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

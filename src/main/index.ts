@@ -99,7 +99,9 @@ if (process.env.ICEBOOST_SHOTS) app.commandLine.appendSwitch('disable-features',
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
-  app.setAppUserModelId('com.aising.iceboost')
+  // Test runs (electron.exe) get their own id: with the same id Windows mixes them up with the
+  // installed app and shows it as "Electron" in the taskbar and notifications.
+  app.setAppUserModelId(app.isPackaged ? 'com.aising.iceboost' : 'com.aising.iceboost.dev')
 
   ipcMain.handle('api', async (_e, method: keyof Api, ...args: unknown[]) => {
     const fn = handlers[method] as (...a: unknown[]) => Promise<unknown>

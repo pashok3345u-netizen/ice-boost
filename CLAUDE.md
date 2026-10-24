@@ -42,7 +42,8 @@ Goal: portfolio piece + give to friends. Owner's PC: i5-9400F, RX 590 8 GB, 16 G
 - `progress.tsx` = XP / levels / 13 achievements in localStorage `iceboost.progress`; call `track({...})` after real actions.
 - `health.ts` = score + issues (shared by Dashboard, mascot, progress).
 - `ICEBOOST_JS=<code>` in shot mode runs JS before each screenshot (e.g. click the mascot).
-- `ICEBOOST_FAKE_GPU='{"temp":89,"voltage":1.27}'` → GPU sensors report these values (check the danger UI + Windows notification). Notifications land in `%LOCALAPPDATA%\Microsoft\Windows\Notifications\wpndatabase.db` (handler `com.aising.iceboost`) — query a copy with Python sqlite3 to confirm one was shown.
+- `ICEBOOST_FAKE_GPU='{"temp":89,"voltage":1.27}'` → GPU sensors report these values (check the danger UI + Windows notification). Notifications land in `%LOCALAPPDATA%\Microsoft\Windows\Notifications\wpndatabase.db` (handler `com.aising.iceboost.dev` for test runs, `com.aising.iceboost` for the installed app) — query a copy with Python sqlite3 to confirm one was shown.
+- Test runs via `electron.exe` use AppUserModelId `com.aising.iceboost.dev` (`app.isPackaged` = false). Never give them the real id: Electron writes a Start-menu `Electron.lnk` with that id, and Windows then shows the installed app as "Electron" (happened 2026-10-24, fixed by deleting the .lnk).
 
 ## GPU monitor (v0.3, added 2026-10-24 — owner's card almost burned)
 - `src/main/gpu.ts`: watcher in the main process, every 2 s, own PowerShell worker `sensorPs`. AMD = ADL (`atiadlxx.dll`) through C# compiled by `Add-Type` on first call; OverdriveN path (RX 400/500/Vega) tested on owner's RX 590, Overdrive 8 PMLog path (RX 5000+) untested. NVIDIA = `nvidia-smi` (no voltage), untested. Detection tries NVIDIA first (AMD iGPU + GeForce PCs).

@@ -36,6 +36,8 @@ interface PartRig {
   glowMats: THREE.MeshStandardMaterial[]
   allMats: THREE.MeshStandardMaterial[]
   glow: number
+  /** red pulse for parts that don't fit */
+  alarm: number
   fade: number
 }
 
@@ -115,7 +117,7 @@ function makeRig(gltf: GLTF): Rig {
     node.traverse((o) => {
       if (o.userData.spin) rotors.push({ obj: o, axis: spinAxis(o), kind })
     })
-    parts.set(node.name, { key: node.name, kind, slot: Number(node.userData.slot ?? 0), pivot, center, glowMats, allMats, glow: 0, fade: 1 })
+    parts.set(node.name, { key: node.name, kind, slot: Number(node.userData.slot ?? 0), pivot, center, glowMats, allMats, glow: 0, alarm: 0, fade: 1 })
   }
   return { parts, rotors }
 }
@@ -224,6 +226,7 @@ function fadeFor(part: PartRig, pick: Pick | null, exploded: boolean, b: Build):
 // ---- scene
 
 const TEAL = new THREE.Color('#528a9a')
+const RED = new THREE.Color('#e5484d')
 const CENTER = new THREE.Vector3(0, 23, 0)
 
 interface StageProps {
@@ -232,18 +235,22 @@ interface StageProps {
   pick: Pick | null
   hover: Pick | null
   exploded: boolean
+  /** slots with a part that doesn't fit — they pulse red */
+  bad: Slot[]
   /** live fan speed of the real video card (rpm), null = unknown */
   gpuRpm: number | null
   onHover: (p: Pick | null) => void
   onPick: (p: Pick | null) => void
 }
 
-function Stage({ rig, build, pick, hover, exploded, gpuRpm, onHover, onPick }: StageProps): ReactNode {
+function Stage({ rig, build, pick, hover, exploded, bad, gpuRpm, onHover, onPick }: StageProps): ReactNode {
   const { camera, gl, scene } = useThree()
   const shown = useMemo(() => shownKeys(build), [build])
   const shownSet = useMemo(() => new Set(shown), [shown])
   const hoverKind = hover ? kindOfPick(hover, build) : null
+  const badKinds = useMemo(() => new Set(bad.filter((s) => s !== 'storage').map((slot) => kindOfPick({ slot }, build))), [bad, build])
   const tmp = useMemo(() => new THREE.Vector3(), [])
+  const tmpColor = useMemo(() => new THREE.Color(), [])
 
   useEffect(() => {
     const pmrem = new THREE.PMREMGenerator(gl)
@@ -301,6 +308,7 @@ function Stage({ rig, build, pick, hover, exploded, gpuRpm, onHover, onPick }: S
 
   useFrame((_, dt) => {
     const k = 1 - Math.exp(-dt * 6)
+    const pulse = 0.55 + 0.45 * Math.sin(performance.now() / 250)
     for (const part of rig.parts.values()) {
       if (!shownSet.has(part.key)) continue
       const mv = moveFor(part, pick, exploded, build)
@@ -311,7 +319,11 @@ function Stage({ rig, build, pick, hover, exploded, gpuRpm, onHover, onPick }: S
 
       const lit = hoverKind === part.kind || (hoverKind === 'psu' && part.kind === 'shroud') ? 1 : 0
       part.glow += (lit - part.glow) * Math.min(1, k * 1.6)
-      for (const m of part.glowMats) m.emissive.copy(TEAL).multiplyScalar(part.glow * 0.35)
+      part.alarm += ((badKinds.has(part.kind) ? 1 : 0) - part.alarm) * k
+      for (const m of part.glowMats) {
+        m.emissive.copy(TEAL).multiplyScalar(part.glow * 0.35)
+        if (part.alarm > 0.01) m.emissive.lerp(tmpColor.copy(RED).multiplyScalar(0.32 * pulse), part.alarm * (1 - part.glow))
+      }
 
       const fade = fadeFor(part, pick, exploded, build)
       if (Math.abs(fade - part.fade) > 0.001) {

@@ -25,6 +25,8 @@ export function runDevHooks(win: BrowserWindow): void {
 async function takeShots(win: BrowserWindow, dir: string): Promise<void> {
   mkdirSync(dir, { recursive: true })
   win.webContents.setBackgroundThrottling(false)
+  // the window pops up on the owner's screen: don't let the real mouse turn the 3D view mid-test
+  win.setIgnoreMouseEvents(true)
   await new Promise<void>((r) => win.webContents.once('did-finish-load', () => r()))
   const pages = (process.env.ICEBOOST_PAGES ?? 'dashboard,gpu,boost,cleaner,startup,processes,settings').split(',')
   await sleep(Number(process.env.ICEBOOST_WAIT ?? 9000))

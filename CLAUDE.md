@@ -62,6 +62,16 @@ Goal: portfolio piece + give to friends. Owner's PC: i5-9400F, RX 590 8 GB, 16 G
 - Disk map: whole drive scan (C: ≈18 s, 580k files, 6 threads on the first 2 levels), tree kept in the engine, `mapLevel` = instant drill-down.
 - Testing uninstall: scratchpad scripts made a throwaway HKCU "IceBoost Test App" (console and wscript uninstallers). Tests that click "delete" must only ever pick test files; test runs also give XP — restore `iceboost.progress` afterwards.
 
+## PC Stand / «Стенд» (v0.5 in progress, branch `feature/pc-stand`, started 2026-10-25)
+Owner's idea: 3D model of *his* PC; pull any part out, swap it, see FPS / price / compatibility change. Built part by part:
+1. 3D stand + click → part flies out + swap list ✓ (2026-10-25) · 2. parts base: prices (new + used/Avito, what the old part sells for) + compatibility (socket, PSU watts, GPU length) · 3. FPS: shooters / heavy / light games + the owner's installed games, pick resolution + graphics · 4. before/after compare + "what to buy for N ₽" advisor · 5. share a build (code or picture). Both modes wanted: upgrade my PC and build from zero. Owner chose: inside IceBoost, realistic look, click → part slides out.
+- Model: `models/make-pc.py` (Blender script, Blender 5.2 is in Steam: `C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe`). Run `blender -b --factory-startup -P models/make-pc.py -- src/renderer/src/assets/pc.glb [p1.png p2.png p3.png]` → GLB + optional preview renders (glass hidden). Preview paths must be short (Blender can't write the 269-char scratchpad path — use `cygpath -d`).
+- GLB = every part and variant as a top-level node with extras `part` (case, glass, shroud, mobo, cpu, cooler, ram, gpu, psu, ssd_m2, ssd_sata, hdd) + `variant`; gpu_1/2/3 (fans), cooler_box/tower, ram_1..4 (slots), fan rotors have `spin`. Units cm; Blender -Y (glass) = three +Z.
+- Renderer: `stand/catalog.ts` (part list + `buildFromSystem`: Windows names → parts; cooler/PSU/case are guessed), `stand/Scene.tsx` (R3F + postprocessing; pivots per part, fly/explode tables, hover glow, glass/shroud fade, camera glide; GPU fans spin at the real card's fan RPM), `pages/Stand.tsx` (lazy-loaded from App.tsx). GLB is imported `?inline` (base64): the packaged app runs from file:// where fetch can't read files; `assetsInclude: ['**/*.glb']` in electron.vite.config.ts.
+- `SystemInfo.ramType` (SMBIOS 26 = DDR4, 34 = DDR5) added for the stand.
+- Owner's PC as Windows reports it: "Intel(R) Core(TM) i5-9400F CPU @ 2.90GHz", "AMD Radeon RX590 GME", 2× Kingston 8 GB DDR4-2666, "DEXP SSD C100 256Gb" (SATA SSD) + "MB1000EBNCF" (1 TB SATA HDD), "Gigabyte H310M H 2.0" (mATX; the model's board is ATX).
+- Test shots of the stand: `ICEBOOST_SHOTS` mode now calls `win.setIgnoreMouseEvents(true)` (the window pops up on the owner's screen and his real mouse used to turn/zoom the 3D view). Drive it with synthetic PointerEvents on the R3F canvas (not the snow canvas — that one has `pointer-events-none`).
+
 ## Install
 - `npm run dist`, then `release\IceBoost-Setup-<ver>.exe` (per-user, no admin to install; `/S` = silent). Installs to `%LOCALAPPDATA%\Programs\IceBoost`, desktop + Start menu shortcuts, listed in Settings → Apps. Icon: `build/make-icon.ps1` → `icon.png` + multi-size `icon.ico`.
 - Window size/position saved in `%APPDATA%\IceBoost\window.json`.

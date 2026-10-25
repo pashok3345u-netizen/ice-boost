@@ -1,13 +1,13 @@
-import { useRef, type ReactNode } from 'react'
+import { lazy, Suspense, useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'motion/react'
-import { Activity, CircleCheck, CircleX, Gauge, Gpu as GpuIcon, HardDrive, Info, Power, Rocket, Settings as SettingsIcon, Sparkles, Trophy } from 'lucide-react'
+import { Activity, CircleCheck, CircleX, Gauge, Gpu as GpuIcon, HardDrive, Info, PcCase, Power, Rocket, Settings as SettingsIcon, Sparkles, Trophy } from 'lucide-react'
 import { checkGpu, tempLevel } from '../../shared/gpu'
 import { StoreProvider, useStore, type Page } from './store'
 import { ProgressProvider, useProgress, levelOf, titleKey, ACHIEVEMENTS } from './progress'
 import { SpaceProvider } from './space'
 import { useHealth } from './health'
-import { Badge, Logo, cx } from './ui'
+import { Badge, Logo, Spinner, cx } from './ui'
 import { BurstLayer, SnowBackground, blizzard } from './Fx'
 import { MascotMini } from './Mascot'
 import { Dashboard } from './pages/Dashboard'
@@ -20,9 +20,21 @@ import { Processes } from './pages/Processes'
 import { Achievements } from './pages/Achievements'
 import { Settings } from './pages/Settings'
 
+// the 3D stand pulls in three.js and the PC model (~5 MB), so it loads only when opened
+const StandPage = lazy(() => import('./pages/Stand').then((m) => ({ default: m.Stand })))
+
+function Stand(): ReactNode {
+  return (
+    <Suspense fallback={<div className="grid h-[calc(100vh-96px)] place-items-center"><Spinner className="size-7" /></div>}>
+      <StandPage />
+    </Suspense>
+  )
+}
+
 const NAV: { id: Page; icon: ReactNode }[] = [
   { id: 'dashboard', icon: <Gauge className="size-[18px]" /> },
   { id: 'gpu', icon: <GpuIcon className="size-[18px]" /> },
+  { id: 'stand', icon: <PcCase className="size-[18px]" /> },
   { id: 'boost', icon: <Rocket className="size-[18px]" /> },
   { id: 'cleaner', icon: <Sparkles className="size-[18px]" /> },
   { id: 'space', icon: <HardDrive className="size-[18px]" /> },
@@ -35,6 +47,7 @@ const NAV: { id: Page; icon: ReactNode }[] = [
 const PAGES: Record<Page, () => ReactNode> = {
   dashboard: Dashboard,
   gpu: Gpu,
+  stand: Stand,
   boost: Boost,
   cleaner: Cleaner,
   space: Space,

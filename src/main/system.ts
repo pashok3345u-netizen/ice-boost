@@ -34,6 +34,7 @@ $caption = ("$($osi.Caption)" -replace '^(Microsoft|Майкрософт)\\s+', 
   ramTotal = [int64]$cs.TotalPhysicalMemory
   ramSticks = $ram.Count
   ramSpeed = if ($ram.Count) { [int]($ram | Measure-Object Speed -Maximum).Maximum } else { 0 }
+  ramType = if ($ram.Count) { [int]$ram[0].SMBIOSMemoryType } else { 0 }
   os = $caption
   build = "$($osi.Version)"
   board = ("$($bb.Manufacturer) $($bb.Product)" -replace 'Gigabyte Technology Co., Ltd.', 'Gigabyte').Trim()

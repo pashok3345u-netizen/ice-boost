@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { GpuState, JunkResult, LiveStats, StartupItem, SystemInfo, TweakState } from '../../shared/types'
 
-export type Page = 'dashboard' | 'gpu' | 'boost' | 'cleaner' | 'space' | 'startup' | 'processes' | 'achievements' | 'settings'
+export type Page = 'dashboard' | 'gpu' | 'stand' | 'boost' | 'cleaner' | 'space' | 'startup' | 'processes' | 'achievements' | 'settings'
 export type ToastKind = 'ok' | 'err' | 'info'
 
 interface Toast {

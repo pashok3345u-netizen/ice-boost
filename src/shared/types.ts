@@ -16,6 +16,8 @@ export interface SystemInfo {
   ramTotal: number
   ramSticks: number
   ramSpeed: number
+  /** SMBIOS memory type: 26 = DDR4, 34 = DDR5, 0 = unknown */
+  ramType: number
   os: string
   build: string
   board: string

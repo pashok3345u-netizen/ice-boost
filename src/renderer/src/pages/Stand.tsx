@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { AnimatePresence, motion } from 'motion/react'
 import {
-  ArrowLeft, Boxes, CircleCheck, CircuitBoard, Cpu, Fan, Gpu as GpuIcon, HardDrive, MemoryStick, MousePointerClick, OctagonAlert,
+  ArrowLeft, Boxes, CircleCheck, Gauge, List, CircuitBoard, Cpu, Fan, Gpu as GpuIcon, HardDrive, MemoryStick, MousePointerClick, OctagonAlert,
   PcCase, Plug, RotateCcw, TriangleAlert, Undo2
 } from 'lucide-react'
 import { useStore } from '../store'
@@ -13,6 +13,8 @@ import {
   buyPrice, checkBuild, partAt, picks, resale, samePart, upgradeCost, withPart, type BuyMode, type Issue
 } from '../stand/check'
 import { PcScene, samePick, type Pick } from '../stand/Scene'
+import { FpsPanel } from '../stand/FpsPanel'
+import { calibrationFor, gain, loadMeasures, pcKey, resFromScreen, saveMeasures, type Calibration, type Measure, type Preset, type Res } from '../stand/games'
 
 const ICON: Record<Slot, ReactNode> = {
   cpu: <Cpu className="size-[18px]" />,
@@ -92,6 +94,9 @@ export function partSpec(p: Part, t: TFunction): string {
 let draftKeep: Build | null = null
 let modeKeep: BuyMode = 'new'
 let sellKeep = true
+let tabKeep: 'parts' | 'fps' = 'parts'
+let resKeep: Res | null = null
+let presetKeep: Preset = 'high'
 
 function IssueLine({ issue, onClick }: { issue: Issue; onClick?: () => void }): ReactNode {
   const { t } = useTranslation()
@@ -120,6 +125,10 @@ export function Stand(): ReactNode {
   const [draft, setDraftState] = useState<Build | null>(draftKeep)
   const [mode, setModeState] = useState<BuyMode>(modeKeep)
   const [sellOld, setSellState] = useState(sellKeep)
+  const [tab, setTabState] = useState(tabKeep)
+  const [resPick, setResState] = useState<Res | null>(resKeep)
+  const [preset, setPresetState] = useState<Preset>(presetKeep)
+  const [measures, setMeasures] = useState<Record<string, Measure>>(loadMeasures)
   const [pick, setPick] = useState<Pick | null>(null)
   const [hover, setHover] = useState<Pick | null>(null)
   const [exploded, setExploded] = useState(false)
@@ -137,6 +146,29 @@ export function Stand(): ReactNode {
   const setSell = (v: boolean): void => {
     sellKeep = v
     setSellState(v)
+  }
+  const setTab = (v: 'parts' | 'fps'): void => {
+    tabKeep = v
+    setTabState(v)
+  }
+  const setRes = (v: Res): void => {
+    resKeep = v
+    setResState(v)
+  }
+  const setPreset = (v: Preset): void => {
+    presetKeep = v
+    setPresetState(v)
+  }
+  // the screen's own resolution until the user picks another one
+  const res = resPick ?? resFromScreen(sys?.resolution ?? '')
+  const cal = useMemo(() => (mine ? calibrationFor(mine, measures) : null), [mine, measures])
+  const measure = (game: string, fps: number | null): void => {
+    if (!mine) return
+    const next = { ...measures }
+    if (fps == null) delete next[game]
+    else next[game] = { fps, res, preset, pc: pcKey(mine) }
+    saveMeasures(next)
+    setMeasures(next)
   }
 
   const build = draft ?? mine
@@ -248,6 +280,9 @@ export function Stand(): ReactNode {
                 build={build}
                 mine={mine}
                 mode={mode}
+                res={res}
+                preset={preset}
+                cal={cal}
                 issues={issues.filter((i) => i.slots.includes(pick.slot))}
                 onBack={() => setPick(null)}
                 onReplace={(part) => setDraft(withPart(build, pick, part))}
@@ -261,7 +296,38 @@ export function Stand(): ReactNode {
                 transition={{ duration: 0.18 }}
                 className="flex min-h-0 flex-1 flex-col"
               >
-                <div className="px-5 pt-5 pb-2 text-xs font-medium tracking-wide text-muted uppercase">{t('stand.parts')}</div>
+                <div className="flex gap-1 px-4 pt-4 pb-3">
+                  {(['parts', 'fps'] as const).map((x) => (
+                    <button
+                      key={x}
+                      onClick={() => setTab(x)}
+                      className={cx(
+                        'relative flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition-colors',
+                        tab === x ? 'text-frost' : 'text-muted hover:text-text'
+                      )}
+                    >
+                      {tab === x && (
+                        <motion.span layoutId="stand-tab" className="absolute inset-0 rounded-lg border border-teal/50 bg-teal/20" />
+                      )}
+                      <span className="relative">{x === 'parts' ? <List className="size-3.5" /> : <Gauge className="size-3.5" />}</span>
+                      <span className="relative">{t(`stand.tab.${x}`)}</span>
+                    </button>
+                  ))}
+                </div>
+                {tab === 'fps' && build ? (
+                  <FpsPanel
+                    build={build}
+                    before={changed ? mine : null}
+                    cal={cal}
+                    res={res}
+                    preset={preset}
+                    refresh={sys?.refresh ?? 0}
+                    onRes={setRes}
+                    onPreset={setPreset}
+                    onPick={(slot) => choose({ slot })}
+                    onMeasure={measure}
+                  />
+                ) : (
                 <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
                   {build ? (
                     rows.map((p) => {
@@ -320,6 +386,7 @@ export function Stand(): ReactNode {
                     </div>
                   )}
                 </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -385,12 +452,15 @@ export function Stand(): ReactNode {
 }
 
 function Details({
-  pick, build, mine, mode, issues, onBack, onReplace
+  pick, build, mine, mode, res, preset, cal, issues, onBack, onReplace
 }: {
   pick: Pick
   build: Build
   mine: Build | null
   mode: BuyMode
+  res: Res
+  preset: Preset
+  cal: Calibration | null
   issues: Issue[]
   onBack: () => void
   onReplace: (p: Part) => void
@@ -407,12 +477,15 @@ function Details({
     return options(pick.slot)
       .filter((o) => !samePart(o, part) && !(part.mine && part.name && o.match?.test(part.name)))
       .map((o) => {
-        const fresh = checkBuild(withPart(build, pick, o)).filter((i) => i.slots.includes(pick.slot) && !before.has(i.id))
+        const next = withPart(build, pick, o)
+        const fresh = checkBuild(next).filter((i) => i.slots.includes(pick.slot) && !before.has(i.id))
         const worst = fresh.find((i) => i.level === 'bad') ?? fresh[0]
-        return { o, price: buyPrice(o, mode), worst }
+        // how much FPS this swap gives on average (only parts that change FPS)
+        const fps = ['gpu', 'cpu', 'ram'].includes(pick.slot) ? gain(build, next, res, preset, cal) : null
+        return { o, price: buyPrice(o, mode), worst, fps }
       })
       .sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity))
-  }, [build, pick, part, mode])
+  }, [build, pick, part, mode, res, preset, cal])
 
   return (
     <motion.div
@@ -472,7 +545,7 @@ function Details({
       <div className="px-5 pt-4 pb-2 text-xs font-medium tracking-wide text-muted uppercase">{t('stand.swap')}</div>
       <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
         {list.length ? (
-          list.map(({ o, price, worst }) => (
+          list.map(({ o, price, worst, fps }) => (
             <button
               key={o.id}
               onClick={() => onReplace(o)}
@@ -481,6 +554,11 @@ function Details({
               <span className="min-w-0 flex-1">
                 <span className={cx('block truncate text-sm font-medium', worst?.level === 'bad' && 'text-muted')}>{partName(o, t)}</span>
                 <span className="block truncate text-[11px] text-muted">{partSpec(o, t)}</span>
+                {fps != null && Math.abs(fps) >= 0.03 && (
+                  <span className={cx('mt-0.5 block text-[11px] font-medium', fps > 0 ? 'text-good' : 'text-bad')}>
+                    {t('stand.fps.gain', { v: `${fps > 0 ? '+' : ''}${Math.round(fps * 100)}` })}
+                  </span>
+                )}
                 {worst && (
                   <span className={cx('mt-0.5 flex items-center gap-1 text-[11px]', worst.level === 'bad' ? 'text-bad' : 'text-warn')}>
                     {worst.level === 'bad' ? <OctagonAlert className="size-3" /> : <TriangleAlert className="size-3" />}

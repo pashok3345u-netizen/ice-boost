@@ -250,6 +250,50 @@ const ru = {
     gb: '{{v}} ГБ',
     tb: '{{v}} ТБ',
     allOk: 'Всё совместимо — собирай!',
+    tab: { parts: 'Детали', fps: 'FPS в играх' },
+    fps: {
+      res: { '1080': '1080p', '1440': '1440p', '2160': '4K' },
+      preset: { low: 'Низкая', medium: 'Средняя', high: 'Высокая', ultra: 'Ультра' },
+      cat: { all: 'Все', shooter: 'Шутер', heavy: 'Тяжёлая', light: 'Лёгкая', mine: 'Мои' },
+      neck: { gpu: 'Упирается в видеокарту', cpu: 'Упирается в процессор', balanced: 'Железо сбалансировано' },
+      neckHint: {
+        gpu: 'Больше всего FPS даст новая видеокарта. Нажми, чтобы выбрать.',
+        cpu: 'Видеокарта ждёт процессор — больше FPS даст новый процессор. Нажми, чтобы выбрать.',
+        balanced: 'Видеокарта и процессор тянут примерно поровну.'
+      },
+      yours: 'у тебя',
+      gain: '{{v}}% FPS в среднем',
+      cap: 'предел игры — {{v}} FPS',
+      vram: 'мало видеопамяти — будут фризы',
+      ram: 'мало оперативки',
+      unknown: 'Ещё у тебя есть: {{list}} — для них пока нет данных.',
+      monitor: 'Твой монитор показывает до {{hz}} кадров в секунду.',
+      note: 'Без DLSS/FSR и трассировки лучей.',
+      estimateNote: 'Это прогноз по тестам железа (±15–20%). Впиши свой реальный FPS в игре — и стенд будет считать от него.',
+      calibrated_one: 'Учтён {{count}} твой замер — для этой игры стенд считает от твоего реального FPS.',
+      calibrated_few: 'Учтено {{count}} твоих замера — для этих игр стенд считает от твоего реального FPS.',
+      calibrated_many: 'Учтено {{count}} твоих замеров — для этих игр стенд считает от твоего реального FPS.',
+      calibrated_other: 'Учтено {{count}} твоих замера — для этих игр стенд считает от твоего реального FPS.',
+      howTo: 'Как узнать свой FPS?',
+      how: {
+        steam: 'Steam: Настройки → В игре → включи счётчик частоты кадров — FPS будет в углу во всех играх из Steam (CS2, Dota 2).',
+        amd: 'Видеокарта AMD: в игре нажми Ctrl+Shift+O — появится счётчик Radeon.',
+        nvidia: 'Видеокарта NVIDIA: Alt+R в игре (оверлей NVIDIA App).',
+        roblox: 'Roblox: Shift+F5 — покажет FPS прямо в игре.',
+        tips: 'Поиграй пару минут в обычном месте (не в меню) и запомни среднее число. Выбери сверху свои разрешение и графику, потом нажми «мой FPS» у игры.'
+      },
+      myFps: 'мой FPS',
+      measured: 'твой замер',
+      measuredAt: 'замер: {{fps}} при {{settings}}',
+      measureAsk: 'Сколько FPS у тебя в этой игре при {{settings}}?',
+      forget: 'Удалить замер',
+      capped: 'Похоже на ограничение FPS или V-Sync. Сними лимит в настройках игры, иначе замер покажет потолок, а не силу ПК.',
+      hint: {
+        roblox: 'Roblox по умолчанию держит не больше 60 FPS. Чтобы было больше — в игре: Настройки → «Максимальная частота кадров».',
+        fortnite: 'Это режим DirectX 12. В режиме «Производительность» FPS намного выше.'
+      },
+      noData: 'Для этой видеокарты или процессора пока нет данных — FPS не посчитать.'
+    },
     cost: {
       title: 'Апгрейд',
       new: 'Новые',
@@ -865,6 +909,50 @@ const en: typeof ru = {
     gb: '{{v}} GB',
     tb: '{{v}} TB',
     allOk: 'Everything fits — go build it!',
+    tab: { parts: 'Parts', fps: 'Game FPS' },
+    fps: {
+      res: { '1080': '1080p', '1440': '1440p', '2160': '4K' },
+      preset: { low: 'Low', medium: 'Medium', high: 'High', ultra: 'Ultra' },
+      cat: { all: 'All', shooter: 'Shooter', heavy: 'Heavy', light: 'Light', mine: 'Mine' },
+      neck: { gpu: 'Held back by the video card', cpu: 'Held back by the processor', balanced: 'Balanced hardware' },
+      neckHint: {
+        gpu: 'A new video card gives the most FPS. Click to pick one.',
+        cpu: 'The video card waits for the processor — a new CPU gives more FPS. Click to pick one.',
+        balanced: 'The video card and the processor pull about evenly.'
+      },
+      yours: 'yours',
+      gain: '{{v}}% FPS on average',
+      cap: 'game limit — {{v}} FPS',
+      vram: 'low video memory — stutters',
+      ram: 'low RAM',
+      unknown: 'You also have: {{list}} — no data for them yet.',
+      monitor: 'Your monitor shows up to {{hz}} frames per second.',
+      note: 'No DLSS/FSR, no ray tracing.',
+      estimateNote: 'This is a forecast from hardware tests (±15–20%). Type your real FPS in a game — and the stand will count from it.',
+      calibrated_one: '{{count}} measurement of yours is used — for that game the stand counts from your real FPS.',
+      calibrated_few: '{{count}} measurements of yours are used — for those games the stand counts from your real FPS.',
+      calibrated_many: '{{count}} measurements of yours are used — for those games the stand counts from your real FPS.',
+      calibrated_other: '{{count}} measurements of yours are used — for those games the stand counts from your real FPS.',
+      howTo: 'How do I see my FPS?',
+      how: {
+        steam: 'Steam: Settings → In Game → "In-game FPS counter" — FPS shows in the corner in every Steam game (CS2, Dota 2).',
+        amd: 'AMD video card: press Ctrl+Shift+O in a game — the Radeon counter shows up.',
+        nvidia: 'NVIDIA video card: Alt+R in a game (NVIDIA App overlay).',
+        roblox: 'Roblox: Shift+F5 shows FPS right in the game.',
+        tips: 'Play a couple of minutes in a normal spot (not a menu) and remember the average. Pick your resolution and graphics above, then press "my FPS" on the game.'
+      },
+      myFps: 'my FPS',
+      measured: 'your number',
+      measuredAt: 'measured: {{fps}} at {{settings}}',
+      measureAsk: 'How many FPS do you get in this game at {{settings}}?',
+      forget: 'Delete measurement',
+      capped: 'Looks like an FPS limit or V-Sync. Turn the limit off in the game settings, or the number shows the cap, not the PC.',
+      hint: {
+        roblox: 'Roblox keeps FPS at 60 by default. For more — in the game: Settings → "Maximum Frame Rate".',
+        fortnite: 'This is DirectX 12 mode. In Performance mode FPS is much higher.'
+      },
+      noData: 'No data for this video card or processor yet — can’t estimate FPS.'
+    },
     cost: {
       title: 'Upgrade',
       new: 'New',

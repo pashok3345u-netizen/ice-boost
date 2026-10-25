@@ -29,6 +29,8 @@ export interface Part {
   threads?: number
   ghz?: number
   socket?: string
+  /** gaming speed: video cards vs RTX 4060 = 100 (1080p), processors vs Core i5-10400F = 100 */
+  perf?: number
   /** W the part draws under load (CPU: what the cooler has to take away too) */
   power?: number
   /** CPU comes with a cooler in the box */
@@ -164,6 +166,17 @@ export const CATALOG: Part[] = [
 
   { id: 'case-mid', slot: 'case', name: 'Mid-Tower ATX', price: p(3500, 1500) }
 ]
+
+// Gaming speed, rough averages from reviews (TechPowerUp / Gamers Nexus / HowManyFPS / CheckFPS style
+// comparisons). RX 590 ≈ 48% of an RTX 4060; RTX 5070 ≈ 1.55× an RTX 5060 at 1080p.
+const PERF: Record<string, number> = {
+  'i3-10105f': 82, 'i5-9400f': 88, 'i5-10400f': 100, 'i5-12400f': 132, 'i5-13400f': 140, 'i5-14600kf': 175,
+  'i7-14700kf': 185, 'r5-3600': 90, 'r5-5600': 128, 'r7-5700x3d': 155, 'r5-7500f': 158, 'r7-7800x3d': 210, 'r7-9800x3d': 240,
+  gtx1650: 35, gtx1660s: 58, rtx3050: 62, rtx3060: 84, rtx4060: 100, rtx4060ti: 124, rtx5060: 120, rtx4070s: 178,
+  rtx5070: 186, rtx5070ti: 230, rx580: 43, rx590: 48, rx6600: 85, rx7600: 102, rx9060xt: 140, rx7800xt: 170, rx9070xt: 225,
+  'arc-b580': 108
+}
+for (const x of CATALOG) if (PERF[x.id]) x.perf = PERF[x.id]
 
 export function options(slot: Slot): Part[] {
   return CATALOG.filter((x) => x.slot === slot)

@@ -1,5 +1,5 @@
 // Things to change for every new release of the app.
-export const VERSION = '0.4.0'
+export const VERSION = '0.5.0'
 export const SIZE_MB = 107
 
 // The .exe files are too big for the site itself, so they live on GitHub Releases.

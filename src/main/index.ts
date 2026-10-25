@@ -13,6 +13,7 @@ import {
   appInstalled, cancelScan, findLeftovers, getAppIcons, getApps, getDrives, getPlaces, getSpaceExtras, mapLevel, openStorageSettings,
   pickFolder, scanApps, scanFiles, scanMap, showInFolder, spaceStatus, trashPaths, uninstallApp
 } from './space'
+import { checkUpdate, installUpdate, updateStatus } from './updater'
 
 const handlers: Api = {
   getSystemInfo,
@@ -47,7 +48,10 @@ const handlers: Api = {
   trashPaths,
   showInFolder,
   pickFolder,
-  openStorageSettings
+  openStorageSettings,
+  checkUpdate,
+  installUpdate,
+  updateStatus
 }
 
 // The window remembers its size and position between launches, like a normal app.

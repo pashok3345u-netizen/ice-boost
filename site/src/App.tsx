@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import {
-  Activity,
   Ban,
   ChevronDown,
   Download,
@@ -15,6 +14,7 @@ import {
   ShieldCheck,
   Sparkles,
   Thermometer,
+  PcCase,
   WifiOff,
   Zap,
   type LucideIcon
@@ -24,7 +24,7 @@ import { BurstLayer, Snow, burst } from './Fx'
 import { LangContext, TEXTS, initialLang, saveLang, useLang, type Lang } from './i18n'
 import { Face, Mascot, type Mood } from './Mascot'
 
-const SHOT_TABS = ['dashboard', 'boost', 'space', 'cleaner', 'achievements'] as const
+const SHOT_TABS = ['dashboard', 'stand', 'boost', 'space', 'cleaner', 'achievements'] as const
 type ShotTab = (typeof SHOT_TABS)[number]
 
 const reveal = {
@@ -194,14 +194,14 @@ function SectionHead({ title, text }: { title: string; text?: string }): ReactNo
 }
 
 const FEATURE_ICONS: Record<keyof (typeof TEXTS)['ru']['features']['list'], LucideIcon> = {
+  stand: PcCase,
   oneClick: Rocket,
   boost: Zap,
   space: HardDrive,
   cleaner: Sparkles,
   gpu: Thermometer,
   gameTime: Gamepad2,
-  startup: Power,
-  live: Activity
+  startup: Power
 }
 
 function Features(): ReactNode {

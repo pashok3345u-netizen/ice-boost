@@ -26,14 +26,14 @@ const ru = {
     title: 'Всё, что нужно геймеру',
     text: 'Без лишних кнопок и непонятных слов — каждая функция объяснена по-человечески.',
     list: {
+      stand: { t: '3D-стенд твоего ПК', d: 'Твой комп в 3D: доставай любую деталь, меняй её и смотри, сколько станет FPS в играх, сколько это стоит и подойдёт ли. Есть советник «что купить на N ₽».' },
       oneClick: { t: 'Оптимизация в 1 клик', d: 'Создаёт точку восстановления, чистит мусор и включает рекомендованные настройки. Одной кнопкой.' },
       boost: { t: 'Ускорение игр', d: 'Игровой режим, без фоновой записи Xbox, максимальная производительность, ровный прицел — 16 настроек с понятным описанием.' },
       space: { t: 'Место для новой игры', d: 'Удобно удаляет программы и игры (даже несколько сразу), показывает, что давно не запускалось, и находит большие старые файлы и копии.' },
       cleaner: { t: 'Очистка мусора', d: 'Временные файлы, кэш браузеров, Discord, Steam и шейдеров. Пароли, вкладки и личные файлы не трогаем.' },
       gpu: { t: 'Видеокарта под присмотром', d: 'Температура, напряжение и вентилятор в реальном времени. Если станет опасно — уведомление прямо во время игры.' },
       gameTime: { t: '«Я сажусь играть»', d: 'Закрывает программы, которые едят память и видеокарту, пока ты играешь.' },
-      startup: { t: 'Автозагрузка', d: 'Показывает, что запускается вместе с Windows, и подсказывает, что можно смело выключить.' },
-      live: { t: 'Нагрузка в реальном времени', d: 'Процессор, память, видеокарта и диск. Сразу видно, какая программа тормозит ПК.' }
+      startup: { t: 'Автозагрузка', d: 'Показывает, что запускается вместе с Windows, и подсказывает, что можно смело выключить.' }
     }
   },
   shots: {
@@ -41,6 +41,7 @@ const ru = {
     text: 'Тёмная тема, снег и никакой рекламы.',
     tabs: {
       dashboard: { t: 'Главная', d: 'Состояние ПК в баллах и список того, что можно улучшить.' },
+      stand: { t: 'Стенд', d: 'Твой ПК в 3D: замени видеокарту — и сразу видно новый FPS в твоих играх и цену апгрейда.' },
       boost: { t: 'Ускорение игр', d: 'У каждой настройки подписано, что она делает и насколько она «сильная».' },
       cleaner: { t: 'Очистка', d: 'Видно, сколько мусора и где. Запущенные программы пропускаются.' },
       space: { t: 'Место на диске', d: 'Удаление программ и игр, большие старые файлы и копии. Видно, сколько места станет для новой игры.' },
@@ -123,14 +124,14 @@ const en: typeof ru = {
     title: 'Everything a gamer needs',
     text: 'No clutter, no confusing jargon — every feature is explained in plain words.',
     list: {
+      stand: { t: 'Your PC in 3D', d: 'Your own PC in 3D: pull out any part, swap it and see the FPS in games, the price and whether it fits. Plus an advisor: what to buy for your budget.' },
       oneClick: { t: 'Optimize in 1 click', d: 'Creates a restore point, cleans junk and turns on the recommended settings. One button.' },
       boost: { t: 'Game Boost', d: 'Game Mode, no background Xbox recording, max performance power plan, raw mouse aim — 16 tweaks explained simply.' },
       space: { t: 'Room for a new game', d: 'Removes apps and games the easy way (several at once), shows what you haven’t opened in ages and finds big old files and duplicates.' },
       cleaner: { t: 'Junk cleaner', d: 'Temp files, browser cache, Discord, Steam and shader cache. Passwords, tabs and personal files stay untouched.' },
       gpu: { t: 'GPU watch', d: 'Temperature, voltage and fan in real time. If it gets dangerous, you get an alert right in the middle of a game.' },
       gameTime: { t: '“I’m going to play”', d: 'Closes apps that eat your RAM and GPU while you play.' },
-      startup: { t: 'Startup apps', d: 'Shows what starts with Windows and tells you what is safe to turn off.' },
-      live: { t: 'Live load', d: 'CPU, RAM, GPU and disk in real time. See right away which app slows your PC down.' }
+      startup: { t: 'Startup apps', d: 'Shows what starts with Windows and tells you what is safe to turn off.' }
     }
   },
   shots: {
@@ -138,6 +139,7 @@ const en: typeof ru = {
     text: 'Dark theme, falling snow and zero ads.',
     tabs: {
       dashboard: { t: 'Dashboard', d: 'Your PC health score and a list of what can be improved.' },
+      stand: { t: 'PC Lab', d: 'Your PC in 3D: swap the video card and see the new FPS in your games and the upgrade price right away.' },
       boost: { t: 'Game Boost', d: 'Every tweak says what it does and how “strong” it is.' },
       cleaner: { t: 'Cleaner', d: 'See how much junk there is and where. Running apps are skipped.' },
       space: { t: 'Disk Space', d: 'Remove apps and games, big old files and duplicates. See how much room the new game will have.' },

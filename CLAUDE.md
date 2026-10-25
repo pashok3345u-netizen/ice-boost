@@ -79,11 +79,22 @@ Owner's idea: 3D model of *his* PC; pull any part out, swap it, see FPS / price 
 - Owner's PC as Windows reports it: "Intel(R) Core(TM) i5-9400F CPU @ 2.90GHz", "AMD Radeon RX590 GME", 2× Kingston 8 GB DDR4-2666, "DEXP SSD C100 256Gb" (SATA SSD) + "MB1000EBNCF" (1 TB SATA HDD), "Gigabyte H310M H 2.0" (mATX; the model's board is ATX).
 - Test shots of the stand: `ICEBOOST_SHOTS` mode now calls `win.setIgnoreMouseEvents(true)` (the window pops up on the owner's screen and his real mouse used to turn/zoom the 3D view). Drive it with synthetic PointerEvents on the R3F canvas (not the snow canvas — that one has `pointer-events-none`).
 
+## Updates (v0.5, added 2026-10-26)
+- `src/main/updater.ts`: `checkUpdate` asks `api.github.com/repos/pashok3345u-netizen/ice-boost/releases/latest` (5 s after start, then every 6 h, packaged app only); newer tag → `UpdateBanner.tsx` under the title bar. "Обновить" downloads `IceBoost-Setup-<ver>.exe` to %TEMP% (size checked against the GitHub asset), writes a PowerShell helper that waits for IceBoost's PID to exit, runs the installer with `/S` (same folder) and starts `process.execPath` again; the app quits. Portable exe (`PORTABLE_EXECUTABLE_DIR`) → opens the release page.
+- So every release MUST have the Setup exe attached and be marked Latest (not draft/prerelease), tag `v<version>` matching package.json.
+- Installs before v0.5 have no updater: friends on v0.2/v0.3 must download v0.5 by hand once.
+- Dev checks: `ICEBOOST_UPDATE_CHECK=1 ICEBOOST_FAKE_VERSION=0.2.0` (real GitHub check from electron.exe), `ICEBOOST_FAKE_UPDATE='{"version":"9.9.9",...}'`, `ICEBOOST_UPDATE_DRYRUN=1` (download, don't install). Tested 2026-10-26: real check + full download of v0.3.0 (112 595 816 bytes, exact), banner states; the helper installed v0.5 over v0.4 silently (44 s).
+- Bash tool quirk: in double quotes `\$VAR` ends up as a literal `$VAR` — build Windows paths with cygpath, not `\` + variable.
+
 ## Install
 - `npm run dist`, then `release\IceBoost-Setup-<ver>.exe` (per-user, no admin to install; `/S` = silent). Installs to `%LOCALAPPDATA%\Programs\IceBoost`, desktop + Start menu shortcuts, listed in Settings → Apps. Icon: `build/make-icon.ps1` → `icon.png` + multi-size `icon.ico`.
 - Window size/position saved in `%APPDATA%\IceBoost\window.json`.
 
-## Status (2026-10-25, v0.4.0)
+## Status (2026-10-26, v0.5.0)
+- v0.5.0 = v0.4 Disk Space (never published before) + Stand (parts 1–4) + updater. Installed on owner's PC via the updater helper. Released on GitHub as Latest; site shows Stand (feature card + screenshot RU/EN) and links v0.5.0. Stand part 5 (share a build) not done yet.
+- CSP in src/renderer/index.html got `font-src 'self' data:` (a small Unbounded subset is inlined as data: and was blocked).
+
+## Status before (2026-10-25, v0.4.0)
 - v0.4 (Disk Space) built and installed on owner's PC (silent install over v0.3). Self-test passes on the packaged build. Uninstall flow tested end-to-end on a fake app; NOT yet tested on a real program, Steam game or Store app, and Prefetch/BAM "last started" not checked with admin rights.
 - Site updated for v0.4 (features, Disk Space screenshot RU/EN, 18 achievements, FAQ) — not pushed yet at the time of writing.
 - Public: repo github.com/pashok3345u-netizen/ice-boost, releases v0.2.0 and v0.3.0 (setup + portable exe), site live on GitHub Pages.

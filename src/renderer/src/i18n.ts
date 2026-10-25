@@ -230,6 +230,19 @@ const ru = {
     moreSpaceText: 'Удали программы и игры, которые давно не запускал, и найди большие старые файлы.',
     moreSpaceBtn: 'Место на диске'
   },
+  update: {
+    title: 'Вышла новая версия IceBoost {{v}}',
+    text: 'Обновление займёт меньше минуты.',
+    whatsNew: 'Что нового?',
+    now: 'Обновить',
+    download: 'Скачать',
+    later: 'Позже',
+    downloading: 'Скачиваю обновление… {{p}}%',
+    installing: 'Устанавливаю обновление',
+    installingHint: 'IceBoost сейчас закроется и через несколько секунд откроется уже новым.',
+    error: 'Не получилось скачать обновление',
+    manual: 'Скачать вручную'
+  },
   stand: {
     title: 'Стенд',
     subtitle: '3D-модель твоего ПК. Нажми на деталь — она выедет, а справа появятся варианты замены.',
@@ -928,6 +941,19 @@ const en: typeof ru = {
     moreSpace: 'Need even more space?',
     moreSpaceText: 'Remove apps and games you haven’t opened in ages, and find big old files.',
     moreSpaceBtn: 'Disk Space'
+  },
+  update: {
+    title: 'A new IceBoost {{v}} is out',
+    text: 'Updating takes less than a minute.',
+    whatsNew: 'What’s new?',
+    now: 'Update',
+    download: 'Download',
+    later: 'Later',
+    downloading: 'Downloading the update… {{p}}%',
+    installing: 'Installing the update',
+    installingHint: 'IceBoost will close now and open again, already updated, in a few seconds.',
+    error: 'Couldn’t download the update',
+    manual: 'Download it manually'
   },
   stand: {
     title: 'PC Lab',

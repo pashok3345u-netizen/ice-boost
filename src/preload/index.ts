@@ -34,7 +34,10 @@ const methods: (keyof Api)[] = [
   'trashPaths',
   'showInFolder',
   'pickFolder',
-  'openStorageSettings'
+  'openStorageSettings',
+  'checkUpdate',
+  'installUpdate',
+  'updateStatus'
 ]
 
 const api = Object.fromEntries(

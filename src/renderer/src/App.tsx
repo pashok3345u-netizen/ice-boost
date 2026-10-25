@@ -10,6 +10,7 @@ import { useHealth } from './health'
 import { Badge, Logo, Spinner, cx } from './ui'
 import { BurstLayer, SnowBackground, blizzard } from './Fx'
 import { MascotMini } from './Mascot'
+import { UpdateBanner } from './UpdateBanner'
 import { Dashboard } from './pages/Dashboard'
 import { Gpu, LEVEL_COLOR } from './pages/Gpu'
 import { Boost } from './pages/Boost'
@@ -137,13 +138,14 @@ function Shell(): ReactNode {
           <Logo size={20} />
         </motion.button>
         <span className="font-display text-[13px] font-semibold tracking-wide">IceBoost</span>
-        <span className="text-[11px] text-muted">v0.4</span>
+        <span className="text-[11px] text-muted">v0.5</span>
         {sys && (
           <span className="ml-2">
             <Badge tone={sys.isAdmin ? 'good' : 'muted'}>{sys.isAdmin ? t('common.adminOn') : t('common.adminOff')}</Badge>
           </span>
         )}
       </header>
+      <UpdateBanner />
 
       <div className="flex min-h-0 flex-1">
         <nav className="flex w-60 shrink-0 flex-col gap-1 bg-deep p-3">

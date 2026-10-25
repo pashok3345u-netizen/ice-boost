@@ -270,6 +270,26 @@ export interface TrashResult {
   refused: string[]
 }
 
+/** a newer IceBoost on GitHub */
+export interface UpdateInfo {
+  version: string
+  /** release page */
+  url: string
+  /** the installer to download; null = only the page */
+  setupUrl: string | null
+  /** bytes of the installer */
+  size: number
+  /** the portable exe can't install over itself: it opens the page instead */
+  portable: boolean
+}
+
+export interface UpdateStatus {
+  state: 'idle' | 'downloading' | 'installing' | 'error'
+  got: number
+  total: number
+  error?: string
+}
+
 export interface Api {
   getSystemInfo(): Promise<SystemInfo>
   getLive(): Promise<LiveStats>
@@ -304,4 +324,7 @@ export interface Api {
   showInFolder(path: string): Promise<void>
   pickFolder(): Promise<string | null>
   openStorageSettings(): Promise<void>
+  checkUpdate(): Promise<UpdateInfo | null>
+  installUpdate(): Promise<OpResult>
+  updateStatus(): Promise<UpdateStatus>
 }

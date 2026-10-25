@@ -12,7 +12,8 @@ Goal: portfolio piece + give to friends. Owner's PC: i5-9400F, RX 590 8 GB, 16 G
 
 ## Dev checks (env vars, see src/main/devhooks.ts)
 - `ICEBOOST_SELFTEST=1` + run electron → prints `@@SELFTEST {json}`: sysinfo, live, processes, startup, tweaks, scan, registry write/read/delete on throwaway key `HKCU\Software\IceBoostSelfTest`, cleaning a temp folder. Touches nothing real.
-- `ICEBOOST_SHOTS=<dir>` (+ `ICEBOOST_PAGES`, `ICEBOOST_WAIT`) → saves PNG of each page, quits.
+- `ICEBOOST_SHOTS=<dir>` (+ `ICEBOOST_PAGES`, `ICEBOOST_WAIT`, `ICEBOOST_PAGE_WAIT` ms per page) → saves PNG of each page, quits. The same page listed twice → `space.png`, `space-2.png`… (use `ICEBOOST_JS` with a `sessionStorage` counter to click different tabs).
+- Self-test also covers Disk Space: drives, app list + measuring, icons, the file engine on a temp folder (copies, "portable game" folder), and that protected paths are refused by `trashPaths`.
 - Run: `node_modules\electron\dist\electron.exe .` (or `... release\win-unpacked\resources\app.asar` for the packaged build)
 - Careful: these runs share `%APPDATA%\IceBoost` (localStorage: lang, XP, achievements) with the installed app. Restore anything you change (e.g. `lang` for EN screenshots).
 
@@ -33,7 +34,7 @@ Goal: portfolio piece + give to friends. Owner's PC: i5-9400F, RX 590 8 GB, 16 G
 - `src/main/startup.ts` — Run keys + Startup folders; toggles via `StartupApproved` (same as Task Manager)
 - `src/main/tweaks.ts` + `src/shared/tweaks.ts` — tweak definitions; backup of original values in `%APPDATA%\IceBoost\backup.json` before first change; undo restores backup or Windows default
 - `src/shared/protected.ts` — processes that can never be killed
-- `src/renderer/src` — pages (Dashboard with health score + one-click, GPU monitor, Boost, Cleaner, Startup, Processes, Settings), `i18n.ts` has all RU/EN text, `catalog.ts` startup hints + "close before game" apps
+- `src/renderer/src` — pages (Dashboard with health score + one-click, GPU monitor, Boost, Cleaner, Disk Space, Startup, Processes, Settings), `i18n.ts` has all RU/EN text, `catalog.ts` startup hints + "close before game" apps + app hints ("better keep") + game detection + disk map hints
 
 ## Design (v0.2)
 - Owner's palette: `#25252B` (bg), `#528A9A` (teal), `#D9E7E8` (frost); tokens in `styles.css` `@theme`, JS copies in `theme.ts`. Headings/numbers use the Unbounded font (`font-display`).
@@ -51,12 +52,23 @@ Goal: portfolio piece + give to friends. Owner's PC: i5-9400F, RX 590 8 GB, 16 G
 - Windows notification only for `danger`, after 2 readings in a row, max once per 3 min per problem, one toast for several problems; click → GPU page. Text RU/EN from renderer `localStorage.lang`.
 - RX 590 readings: idle 0.762 V / ~42 °C / 300 MHz / ~7 W, light load 1.081 V @ 1300 MHz. Fans stop below ~50–60 °C (zero-RPM) → fan RPM 0 is normal when cool. Fan RPM under real load NOT verified yet (card never got warm enough in tests).
 
+## Disk Space page (v0.4, added 2026-10-25 — friends need room for games)
+- `src/main/space.ts` (IPC side) + `src/main/space.cs` (C# engine, `Add-Type` in its own worker `diskPs`, imported with `?raw`) + `src/main/space-apps.ps1` (app list). Renderer: `space.tsx` (context above the pages), `pages/Space.tsx` (goal card + quick finds), `pages/space/*` (Apps, Files, Map tabs, uninstall window, treemap).
+- Apps = Windows "Apps" registry (HKLM/WOW/HKCU Uninstall) + Steam manifests (size, LastPlayed; unfinished download in `steamapps\downloading\<id>` counted) + Epic manifests (untested, no Epic here) + Store apps with a Start menu entry. Folders measured by the engine; "last started" from Prefetch + BAM (need admin = only in the packaged app) + UserAssist (off on owner's PC).
+- Uninstall: windowed uninstallers are spawned directly from main (window comes to the front), console ones (PE subsystem 3: powershell, winget) via PS `Start-Process`. Quiet mode: QuietUninstallString / MSI `/x /qb` / Inno `_is1` `/SILENT`. Steam → `steam://uninstall/<id>`. Store → `Remove-AppxPackage`. Then polls `appInstalled` and looks for leftovers (install folder + AppData/ProgramData folders with the exact app/folder name).
+- Nothing is deleted for good: files/leftovers go to the Recycle Bin (`shell.trashItem`), quick find "Корзина" empties it. `shared/space.ts` `lockReason()` protects Windows, Program Files, ProgramData, AppData, drive roots, Users/profile/known folders and installed app folders — checked again in main before trashing.
+- Files tab: user folder (+ added folders), files ≥10 MB; "last used" = max(changed, created, opened if NtfsDisableLastAccessUpdate allows). Files in folders with an `.exe` next to `.dll` (portable apps/games, build outputs) are hidden and never count as copies — a test once picked real `release\win-unpacked` files as "copies".
+- Copies: same size → SHA1 (full ≤256 MB, else 32×1 MB samples); the file's "last opened" date is put back after reading.
+- Disk map: whole drive scan (C: ≈18 s, 580k files, 6 threads on the first 2 levels), tree kept in the engine, `mapLevel` = instant drill-down.
+- Testing uninstall: scratchpad scripts made a throwaway HKCU "IceBoost Test App" (console and wscript uninstallers). Tests that click "delete" must only ever pick test files; test runs also give XP — restore `iceboost.progress` afterwards.
+
 ## Install
 - `npm run dist`, then `release\IceBoost-Setup-<ver>.exe` (per-user, no admin to install; `/S` = silent). Installs to `%LOCALAPPDATA%\Programs\IceBoost`, desktop + Start menu shortcuts, listed in Settings → Apps. Icon: `build/make-icon.ps1` → `icon.png` + multi-size `icon.ico`.
 - Window size/position saved in `%APPDATA%\IceBoost\window.json`.
 
-## Status (2026-10-25, v0.3.0, on `main`)
-- v0.3 (GPU monitor) installed on owner's PC (silent install over v0.2). Self-test passes on the packaged build.
+## Status (2026-10-25, v0.4.0)
+- v0.4 (Disk Space) built and installed on owner's PC (silent install over v0.3). Self-test passes on the packaged build. Uninstall flow tested end-to-end on a fake app; NOT yet tested on a real program, Steam game or Store app, and Prefetch/BAM "last started" not checked with admin rights.
+- Site updated for v0.4 (features, Disk Space screenshot RU/EN, 18 achievements, FAQ) — not pushed yet at the time of writing.
 - Public: repo github.com/pashok3345u-netizen/ice-boost, releases v0.2.0 and v0.3.0 (setup + portable exe), site live on GitHub Pages.
 - NOT yet verified on real settings: applying/undoing real tweaks, admin cleaning, restore point, UAC flows. First real run should be by the owner.
 - Exe is unsigned → SmartScreen warning for friends ("More info → Run anyway").

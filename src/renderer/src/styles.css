@@ -200,3 +200,15 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* "hidden by the system" tile on the disk map */
+.stripes {
+  background-image: repeating-linear-gradient(135deg, rgba(217, 231, 232, 0.07) 0 6px, transparent 6px 12px) !important;
+}
+
+/* number input of the space goal: no browser arrows */
+.no-spin::-webkit-outer-spin-button,
+.no-spin::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

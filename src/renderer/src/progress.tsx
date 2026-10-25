@@ -19,6 +19,11 @@ export interface Stats {
   streak: number
   lastVisit: string
   bestScore: number
+  uninstalls: number
+  /** files moved to the Recycle Bin from the Disk Space page */
+  trashed: number
+  /** of them: not opened for over a year */
+  oldFiles: number
 }
 
 interface Saved {
@@ -50,6 +55,11 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'score90', emoji: '🏆', xp: 100, progress: (s) => s.bestScore / 90 },
   { id: 'streak3', emoji: '🔥', xp: 60, progress: (s) => s.streak / 3 },
   { id: 'streak7', emoji: '💎', xp: 150, progress: (s) => s.streak / 7 },
+  { id: 'firstUninstall', emoji: '📦', xp: 25, progress: (s) => Math.min(1, s.uninstalls) },
+  { id: 'uninstall5', emoji: '🧳', xp: 80, progress: (s) => s.uninstalls / 5 },
+  { id: 'oldFile', emoji: '🦖', xp: 40, progress: (s) => Math.min(1, s.oldFiles) },
+  { id: 'goal', emoji: '🎯', xp: 100, progress: () => 0 },
+  { id: 'gb50', emoji: '🌋', xp: 250, progress: (s) => s.freed / (50 * GB) },
   { id: 'nightOwl', emoji: '🦉', xp: 30, progress: () => 0 },
   { id: 'secret', emoji: '❄️', xp: 77, secret: true, progress: () => 0 }
 ]
@@ -83,7 +93,10 @@ export function titleKey(level: number): string {
 
 const EMPTY: Saved = {
   xp: 0,
-  stats: { freed: 0, cleans: 0, tweaks: 0, oneClicks: 0, startupOff: 0, appsClosed: 0, visits: 0, streak: 0, lastVisit: '', bestScore: 0 },
+  stats: {
+    freed: 0, cleans: 0, tweaks: 0, oneClicks: 0, startupOff: 0, appsClosed: 0, visits: 0, streak: 0, lastVisit: '', bestScore: 0,
+    uninstalls: 0, trashed: 0, oldFiles: 0
+  },
   unlocked: {}
 }
 
@@ -116,6 +129,9 @@ export type TrackEvent =
   | { type: 'oneClick' }
   | { type: 'startupOff' }
   | { type: 'appsClosed' }
+  | { type: 'uninstall'; freed: number }
+  | { type: 'trash'; count: number; old: number }
+  | { type: 'goal' }
   | { type: 'secret' }
 
 interface Gain {
@@ -211,10 +227,21 @@ export function ProgressProvider({ children }: { children: ReactNode }): ReactNo
           case 'appsClosed':
             s.appsClosed++
             return { p, xp: 5 }
+          case 'uninstall':
+            s.uninstalls++
+            s.freed += e.freed
+            return { p, xp: 20 + Math.min(200, Math.floor(e.freed / (100 * 1024 ** 2))) }
+          // the space is freed only when the bin is emptied — that counts as a cleaning
+          case 'trash':
+            s.trashed += e.count
+            s.oldFiles += e.old
+            return { p, xp: 5 + Math.min(45, 2 * e.count) }
+          case 'goal':
+            return { p, xp: 0 }
           case 'secret':
             return { p, xp: 0 }
         }
-      }, { allRec, force: e.type === 'secret' ? ['secret'] : undefined })
+      }, { allRec, force: e.type === 'secret' ? ['secret'] : e.type === 'goal' ? ['goal'] : undefined })
     },
     [update, allRec]
   )

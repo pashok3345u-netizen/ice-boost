@@ -1,8 +1,9 @@
 // Developer-only checks, switched on by environment variables (never in normal use):
 //   ICEBOOST_SHOTS=<folder>  — opens every page and saves a screenshot of it, then quits
+//                              (ICEBOOST_PAGES=a,b — which pages, ICEBOOST_PAGE_WAIT=ms — time on each page)
 //   ICEBOOST_SELFTEST=1      — tests the PowerShell engine on a throwaway registry key and folder, then quits
 import { app, type BrowserWindow } from 'electron'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { getLive, getProcesses, getSystemInfo } from './system'
@@ -11,6 +12,7 @@ import { getStartup } from './startup'
 import { getGpu } from './gpu'
 import { getTweaks, _readOps, _writeOps } from './tweaks'
 import { taskPs } from './ps'
+import { _selfTestFiles, getAppIcons, getApps, getDrives, getSpaceExtras, scanApps, trashPaths } from './space'
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
@@ -26,16 +28,17 @@ async function takeShots(win: BrowserWindow, dir: string): Promise<void> {
   await new Promise<void>((r) => win.webContents.once('did-finish-load', () => r()))
   const pages = (process.env.ICEBOOST_PAGES ?? 'dashboard,gpu,boost,cleaner,startup,processes,settings').split(',')
   await sleep(Number(process.env.ICEBOOST_WAIT ?? 9000))
-  for (const p of pages) {
+  for (const [i, p] of pages.entries()) {
     await win.webContents.executeJavaScript(`window.__iceGoto && window.__iceGoto(${JSON.stringify(p)})`)
-    await sleep(2500)
+    await sleep(Number(process.env.ICEBOOST_PAGE_WAIT ?? 2500))
     // optional extra script, e.g. to click something before the screenshot
     if (process.env.ICEBOOST_JS) {
       await win.webContents.executeJavaScript(process.env.ICEBOOST_JS)
       await sleep(900)
     }
     const img = await win.webContents.capturePage()
-    writeFileSync(join(dir, `${p}.png`), img.toPNG())
+    // the same page twice (e.g. different tabs via ICEBOOST_JS) → space.png, space-2.png...
+    writeFileSync(join(dir, pages.indexOf(p) === i ? `${p}.png` : `${p}-${i + 1}.png`), img.toPNG())
   }
   app.quit()
 }
@@ -81,6 +84,45 @@ async function selfTest(): Promise<void> {
   writeFileSync(join(dir, 'a.txt'), 'x'.repeat(1000))
   writeFileSync(join(dir, 'sub', 'b.txt'), 'y'.repeat(2000))
   await step('clean-folder', () => _cleanFolder(dir), out)
+
+  // disk space: real lists are only read; the file engine runs on a throwaway folder
+  await step('drives', getDrives, out)
+  await step('space-extras', getSpaceExtras, out)
+  const apps = await step('apps', getApps, out)
+  if (apps) out.apps = { ok: true, count: apps.length, sample: apps.slice(0, 6) }
+  const scanned = await step('apps-scan', scanApps, out)
+  if (scanned) out['apps-scan'] = { ok: true, measured: scanned.filter((s) => s.size != null).length, withLastUsed: scanned.filter((s) => s.lastUsed).length }
+  if (apps) {
+    const icons = await step('app-icons', () => getAppIcons(apps.map((a) => a.id)), out)
+    if (icons) out['app-icons'] = { ok: true, count: Object.keys(icons).length, of: apps.length }
+  }
+  const sdir = join(tmpdir(), 'iceboost-selftest-space')
+  mkdirSync(join(sdir, 'sub'), { recursive: true })
+  mkdirSync(join(sdir, 'skipme'), { recursive: true })
+  const big = Buffer.alloc(3 * 1024 * 1024, 7)
+  writeFileSync(join(sdir, 'video.mp4'), big)
+  writeFileSync(join(sdir, 'sub', 'video-copy.mp4'), big)
+  writeFileSync(join(sdir, 'sub', 'other.bin'), Buffer.alloc(3 * 1024 * 1024, 9))
+  writeFileSync(join(sdir, 'skipme', 'hidden.bin'), big)
+  writeFileSync(join(sdir, 'small.txt'), 'z'.repeat(5000))
+  // a "portable game": its files must be marked as part of a program and never count as copies
+  mkdirSync(join(sdir, 'portable', 'levels'), { recursive: true })
+  writeFileSync(join(sdir, 'portable', 'game.exe'), 'MZ')
+  writeFileSync(join(sdir, 'portable', 'engine.dll'), 'MZ')
+  writeFileSync(join(sdir, 'portable', 'data.pak'), big)
+  writeFileSync(join(sdir, 'portable', 'levels', 'level1.pak'), Buffer.alloc(3 * 1024 * 1024, 11))
+  await step('space-files', () => _selfTestFiles(sdir), out)
+  // protected places must be refused before anything happens (the paths don't exist, so even a bug can't hurt)
+  await step('space-guard', async () => {
+    const r = await trashPaths([
+      'C:\\Windows\\iceboost-selftest.txt',
+      'C:\\Program Files\\iceboost-selftest',
+      join(process.env.LOCALAPPDATA ?? 'C:\\Users\\x\\AppData\\Local', 'iceboost-selftest'),
+      'Q:\\'
+    ])
+    return { refused: r.refused.length, of: 4, moved: r.moved }
+  }, out)
+  rmSync(sdir, { recursive: true, force: true })
 
   process.stdout.write('\n@@SELFTEST ' + JSON.stringify(out) + '\n')
   app.quit()

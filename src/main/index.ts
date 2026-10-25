@@ -9,6 +9,10 @@ import { applyTweaks, createRestorePoint, getTweaks, revertTweaks } from './twea
 import { disposePs } from './ps'
 import { getGpu, resetGpuMax, startGpuWatch, stopGpuWatch } from './gpu'
 import { runDevHooks } from './devhooks'
+import {
+  appInstalled, cancelScan, findLeftovers, getAppIcons, getApps, getDrives, getPlaces, getSpaceExtras, mapLevel, openStorageSettings,
+  pickFolder, scanApps, scanFiles, scanMap, showInFolder, spaceStatus, trashPaths, uninstallApp
+} from './space'
 
 const handlers: Api = {
   getSystemInfo,
@@ -25,7 +29,25 @@ const handlers: Api = {
   getTweaks,
   applyTweaks,
   revertTweaks,
-  createRestorePoint
+  createRestorePoint,
+  getDrives,
+  getPlaces,
+  getSpaceExtras,
+  getApps,
+  scanApps,
+  getAppIcons,
+  uninstallApp,
+  appInstalled,
+  findLeftovers,
+  scanFiles,
+  scanMap,
+  mapLevel,
+  spaceStatus,
+  cancelScan,
+  trashPaths,
+  showInFolder,
+  pickFolder,
+  openStorageSettings
 }
 
 // The window remembers its size and position between launches, like a normal app.

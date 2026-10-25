@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Download,
   Gamepad2,
+  HardDrive,
   Lock,
   Package,
   Power,
@@ -13,6 +14,7 @@ import {
   RotateCcw,
   ShieldCheck,
   Sparkles,
+  Thermometer,
   WifiOff,
   Zap,
   type LucideIcon
@@ -22,7 +24,7 @@ import { BurstLayer, Snow, burst } from './Fx'
 import { LangContext, TEXTS, initialLang, saveLang, useLang, type Lang } from './i18n'
 import { Face, Mascot, type Mood } from './Mascot'
 
-const SHOT_TABS = ['dashboard', 'boost', 'cleaner', 'achievements'] as const
+const SHOT_TABS = ['dashboard', 'boost', 'space', 'cleaner', 'achievements'] as const
 type ShotTab = (typeof SHOT_TABS)[number]
 
 const reveal = {
@@ -194,7 +196,9 @@ function SectionHead({ title, text }: { title: string; text?: string }): ReactNo
 const FEATURE_ICONS: Record<keyof (typeof TEXTS)['ru']['features']['list'], LucideIcon> = {
   oneClick: Rocket,
   boost: Zap,
+  space: HardDrive,
   cleaner: Sparkles,
+  gpu: Thermometer,
   gameTime: Gamepad2,
   startup: Power,
   live: Activity
@@ -206,11 +210,11 @@ function Features(): ReactNode {
   return (
     <section id="features" className="relative px-4 py-24 sm:px-6 sm:py-28">
       <SectionHead title={t.features.title} text={t.features.text} />
-      <div className="mx-auto mt-14 grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mx-auto mt-14 grid max-w-6xl gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {items.map(([key, f], i) => {
           const Icon = FEATURE_ICONS[key]
           return (
-            <motion.div key={key} {...reveal} transition={{ ...reveal.transition, delay: (i % 3) * 0.08 }} className="card card-hover rounded-3xl border border-line p-6">
+            <motion.div key={key} {...reveal} transition={{ ...reveal.transition, delay: (i % 4) * 0.08 }} className="card card-hover rounded-3xl border border-line p-6">
               <div className={`flex size-12 items-center justify-center rounded-2xl ${i === 0 ? 'accent-gradient text-deep' : 'bg-teal/15 text-ice'}`}>
                 <Icon className="size-6" />
               </div>

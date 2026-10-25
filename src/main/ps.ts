@@ -154,11 +154,19 @@ export const monitorPs = new PsWorker()
 export const taskPs = new PsWorker()
 /** For the video card sensors — asked every 2 s, so it gets its own process. */
 export const sensorPs = new PsWorker()
+/** For disk scans (apps, big files, disk map) — they run on a background thread inside it. */
+export const diskPs = new PsWorker()
 
 export function disposePs(): void {
   monitorPs.dispose()
   taskPs.dispose()
   sensorPs.dispose()
+  diskPs.dispose()
+}
+
+/** A JS string array as a PowerShell array. */
+export function psArr(items: string[]): string {
+  return `@(${items.map(psStr).join(',')})`
 }
 
 /** Embeds a JS value into a script as a PowerShell object. */

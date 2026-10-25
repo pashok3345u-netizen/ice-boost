@@ -19,7 +19,7 @@ const ru = {
   stats: [
     { n: '16', t: 'настроек для игр и Windows' },
     { n: '8', t: 'видов мусора' },
-    { n: '13', t: 'достижений' },
+    { n: '18', t: 'достижений' },
     { n: '1', t: 'клик до оптимизации' }
   ],
   features: {
@@ -28,7 +28,9 @@ const ru = {
     list: {
       oneClick: { t: 'Оптимизация в 1 клик', d: 'Создаёт точку восстановления, чистит мусор и включает рекомендованные настройки. Одной кнопкой.' },
       boost: { t: 'Ускорение игр', d: 'Игровой режим, без фоновой записи Xbox, максимальная производительность, ровный прицел — 16 настроек с понятным описанием.' },
+      space: { t: 'Место для новой игры', d: 'Удобно удаляет программы и игры (даже несколько сразу), показывает, что давно не запускалось, и находит большие старые файлы и копии.' },
       cleaner: { t: 'Очистка мусора', d: 'Временные файлы, кэш браузеров, Discord, Steam и шейдеров. Пароли, вкладки и личные файлы не трогаем.' },
+      gpu: { t: 'Видеокарта под присмотром', d: 'Температура, напряжение и вентилятор в реальном времени. Если станет опасно — уведомление прямо во время игры.' },
       gameTime: { t: '«Я сажусь играть»', d: 'Закрывает программы, которые едят память и видеокарту, пока ты играешь.' },
       startup: { t: 'Автозагрузка', d: 'Показывает, что запускается вместе с Windows, и подсказывает, что можно смело выключить.' },
       live: { t: 'Нагрузка в реальном времени', d: 'Процессор, память, видеокарта и диск. Сразу видно, какая программа тормозит ПК.' }
@@ -41,7 +43,8 @@ const ru = {
       dashboard: { t: 'Главная', d: 'Состояние ПК в баллах и список того, что можно улучшить.' },
       boost: { t: 'Ускорение игр', d: 'У каждой настройки подписано, что она делает и насколько она «сильная».' },
       cleaner: { t: 'Очистка', d: 'Видно, сколько мусора и где. Запущенные программы пропускаются.' },
-      achievements: { t: 'Достижения', d: 'Опыт, уровни и 13 достижений — заботиться о ПК весело.' }
+      space: { t: 'Место на диске', d: 'Удаление программ и игр, большие старые файлы и копии. Видно, сколько места станет для новой игры.' },
+      achievements: { t: 'Достижения', d: 'Опыт, уровни и 18 достижений — заботиться о ПК весело.' }
     }
   },
   mascot: {
@@ -85,6 +88,10 @@ const ru = {
       },
       { q: 'Зачем программе права администратора?', a: 'Без них нельзя менять настройки Windows и чистить системные папки. Поэтому при запуске Windows спросит разрешение.' },
       { q: 'Можно вернуть всё как было?', a: 'Да. В разделе «Ускорение игр» есть кнопка «Вернуть всё как было», а перед сильными настройками создаётся точка восстановления.' },
+      {
+        q: 'Не удалит ли IceBoost что-то нужное?',
+        a: 'Файлы сначала попадают в корзину — их можно вернуть. Windows, папки программ и системные папки защищены, а программы удаляются их собственным удалятором, как в параметрах Windows.'
+      },
       { q: 'Какая нужна Windows?', a: 'Windows 10 или 11, 64-бит.' },
       { q: 'Как удалить?', a: 'Как любую программу: Параметры → Приложения → IceBoost → Удалить.' }
     ]
@@ -109,7 +116,7 @@ const en: typeof ru = {
   stats: [
     { n: '16', t: 'game & Windows tweaks' },
     { n: '8', t: 'kinds of junk' },
-    { n: '13', t: 'achievements' },
+    { n: '18', t: 'achievements' },
     { n: '1', t: 'click to optimize' }
   ],
   features: {
@@ -118,7 +125,9 @@ const en: typeof ru = {
     list: {
       oneClick: { t: 'Optimize in 1 click', d: 'Creates a restore point, cleans junk and turns on the recommended settings. One button.' },
       boost: { t: 'Game Boost', d: 'Game Mode, no background Xbox recording, max performance power plan, raw mouse aim — 16 tweaks explained simply.' },
+      space: { t: 'Room for a new game', d: 'Removes apps and games the easy way (several at once), shows what you haven’t opened in ages and finds big old files and duplicates.' },
       cleaner: { t: 'Junk cleaner', d: 'Temp files, browser cache, Discord, Steam and shader cache. Passwords, tabs and personal files stay untouched.' },
+      gpu: { t: 'GPU watch', d: 'Temperature, voltage and fan in real time. If it gets dangerous, you get an alert right in the middle of a game.' },
       gameTime: { t: '“I’m going to play”', d: 'Closes apps that eat your RAM and GPU while you play.' },
       startup: { t: 'Startup apps', d: 'Shows what starts with Windows and tells you what is safe to turn off.' },
       live: { t: 'Live load', d: 'CPU, RAM, GPU and disk in real time. See right away which app slows your PC down.' }
@@ -131,7 +140,8 @@ const en: typeof ru = {
       dashboard: { t: 'Dashboard', d: 'Your PC health score and a list of what can be improved.' },
       boost: { t: 'Game Boost', d: 'Every tweak says what it does and how “strong” it is.' },
       cleaner: { t: 'Cleaner', d: 'See how much junk there is and where. Running apps are skipped.' },
-      achievements: { t: 'Achievements', d: 'XP, levels and 13 achievements — PC care that is actually fun.' }
+      space: { t: 'Disk Space', d: 'Remove apps and games, big old files and duplicates. See how much room the new game will have.' },
+      achievements: { t: 'Achievements', d: 'XP, levels and 18 achievements — PC care that is actually fun.' }
     }
   },
   mascot: {
@@ -175,6 +185,10 @@ const en: typeof ru = {
       },
       { q: 'Why does it need admin rights?', a: 'Windows settings and system folders can’t be changed without them, so Windows asks for permission when the app starts.' },
       { q: 'Can I undo everything?', a: 'Yes. Game Boost has an “Undo everything” button, and a restore point is created before strong tweaks.' },
+      {
+        q: 'Can IceBoost delete something important?',
+        a: 'Files go to the Recycle Bin first, so you can bring them back. Windows, app folders and system folders are protected, and apps are removed by their own uninstaller, just like in Windows Settings.'
+      },
       { q: 'Which Windows do I need?', a: 'Windows 10 or 11, 64-bit.' },
       { q: 'How do I uninstall it?', a: 'Like any app: Settings → Apps → IceBoost → Uninstall.' }
     ]

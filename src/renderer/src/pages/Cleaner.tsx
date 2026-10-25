@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'motion/react'
-import { AppWindow, Bug, Cpu, Download, FolderClock, Globe, Lock, MonitorCog, RefreshCw, Sparkles, Trash2, Wand2 } from 'lucide-react'
+import { AppWindow, Bug, ChevronRight, Cpu, Download, FolderClock, Globe, HardDrive, Lock, MonitorCog, RefreshCw, Sparkles, Trash2, Wand2 } from 'lucide-react'
 import type { CleanResult } from '../../../shared/types'
 import { useStore } from '../store'
 import { useProgress } from '../progress'
@@ -23,7 +23,7 @@ const ICONS: Record<string, ReactNode> = {
 export function Cleaner(): ReactNode {
   const { t, i18n } = useTranslation()
   const lang = i18n.language
-  const { junk, scanning, scan, toast } = useStore()
+  const { junk, scanning, scan, toast, go } = useStore()
   const { track } = useProgress()
   const [picked, setPicked] = useState<Set<string> | null>(null)
   const [cleaning, setCleaning] = useState(false)
@@ -159,6 +159,20 @@ export function Cleaner(): ReactNode {
           )
         )}
       </div>
+
+      <Card delay={0.3} className="mt-5 flex items-center gap-4">
+        <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-teal/15 text-ice">
+          <HardDrive className="size-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="font-medium">{t('cleaner.moreSpace')}</div>
+          <p className="text-sm text-muted">{t('cleaner.moreSpaceText')}</p>
+        </div>
+        <Button onClick={() => go('space')}>
+          {t('cleaner.moreSpaceBtn')}
+          <ChevronRight className="size-4" />
+        </Button>
+      </Card>
     </div>
   )
 }

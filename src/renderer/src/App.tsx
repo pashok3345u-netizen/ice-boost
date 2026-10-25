@@ -1,10 +1,11 @@
 import { useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'motion/react'
-import { Activity, CircleCheck, CircleX, Gauge, Gpu as GpuIcon, Info, Power, Rocket, Settings as SettingsIcon, Sparkles, Trophy } from 'lucide-react'
+import { Activity, CircleCheck, CircleX, Gauge, Gpu as GpuIcon, HardDrive, Info, Power, Rocket, Settings as SettingsIcon, Sparkles, Trophy } from 'lucide-react'
 import { checkGpu, tempLevel } from '../../shared/gpu'
 import { StoreProvider, useStore, type Page } from './store'
 import { ProgressProvider, useProgress, levelOf, titleKey, ACHIEVEMENTS } from './progress'
+import { SpaceProvider } from './space'
 import { useHealth } from './health'
 import { Badge, Logo, cx } from './ui'
 import { BurstLayer, SnowBackground, blizzard } from './Fx'
@@ -13,6 +14,7 @@ import { Dashboard } from './pages/Dashboard'
 import { Gpu, LEVEL_COLOR } from './pages/Gpu'
 import { Boost } from './pages/Boost'
 import { Cleaner } from './pages/Cleaner'
+import { Space } from './pages/Space'
 import { Startup } from './pages/Startup'
 import { Processes } from './pages/Processes'
 import { Achievements } from './pages/Achievements'
@@ -23,6 +25,7 @@ const NAV: { id: Page; icon: ReactNode }[] = [
   { id: 'gpu', icon: <GpuIcon className="size-[18px]" /> },
   { id: 'boost', icon: <Rocket className="size-[18px]" /> },
   { id: 'cleaner', icon: <Sparkles className="size-[18px]" /> },
+  { id: 'space', icon: <HardDrive className="size-[18px]" /> },
   { id: 'startup', icon: <Power className="size-[18px]" /> },
   { id: 'processes', icon: <Activity className="size-[18px]" /> },
   { id: 'achievements', icon: <Trophy className="size-[18px]" /> },
@@ -34,6 +37,7 @@ const PAGES: Record<Page, () => ReactNode> = {
   gpu: Gpu,
   boost: Boost,
   cleaner: Cleaner,
+  space: Space,
   startup: Startup,
   processes: Processes,
   achievements: Achievements,
@@ -120,7 +124,7 @@ function Shell(): ReactNode {
           <Logo size={20} />
         </motion.button>
         <span className="font-display text-[13px] font-semibold tracking-wide">IceBoost</span>
-        <span className="text-[11px] text-muted">v0.3</span>
+        <span className="text-[11px] text-muted">v0.4</span>
         {sys && (
           <span className="ml-2">
             <Badge tone={sys.isAdmin ? 'good' : 'muted'}>{sys.isAdmin ? t('common.adminOn') : t('common.adminOff')}</Badge>
@@ -221,7 +225,9 @@ export function App(): ReactNode {
   return (
     <StoreProvider>
       <ProgressProvider>
-        <Shell />
+        <SpaceProvider>
+          <Shell />
+        </SpaceProvider>
       </ProgressProvider>
     </StoreProvider>
   )

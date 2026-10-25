@@ -16,7 +16,25 @@ const methods: (keyof Api)[] = [
   'getTweaks',
   'applyTweaks',
   'revertTweaks',
-  'createRestorePoint'
+  'createRestorePoint',
+  'getDrives',
+  'getPlaces',
+  'getSpaceExtras',
+  'getApps',
+  'scanApps',
+  'getAppIcons',
+  'uninstallApp',
+  'appInstalled',
+  'findLeftovers',
+  'scanFiles',
+  'scanMap',
+  'mapLevel',
+  'spaceStatus',
+  'cancelScan',
+  'trashPaths',
+  'showInFolder',
+  'pickFolder',
+  'openStorageSettings'
 ]
 
 const api = Object.fromEntries(

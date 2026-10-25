@@ -59,3 +59,53 @@ export const CLOSEABLE: Closeable[] = [
   { proc: 'browser', label: 'Yandex Browser', def: false },
   { proc: 'firefox', label: 'Firefox', def: false }
 ]
+
+// ---- installed apps: what not to remove, and what is a game
+
+export type AppHint = 'keep' | 'careful'
+
+const APP_RULES: [RegExp, AppHint, string][] = [
+  [/^iceboost$/i, 'keep', 'self'],
+  [
+    /visual c\+\+|visual basic\/c\+\+|redistributable|desktop runtime|\.net (runtime|framework)|directx|xna framework|vcredist|webview2|gameinput|application compatibility|tools for office runtime/i,
+    'keep',
+    'runtime'
+  ],
+  [/amd software|radeon|adrenalin|amd chipset|nvidia|geforce|realtek|intel\(r\)|chipset|driver/i, 'keep', 'driver'],
+  [/^microsoft edge|^microsoft store$|app installer|установщик приложений|безопасность windows|windows security|xbox identity/i, 'keep', 'windows'],
+  [/^steam$|epic games launcher|rockstar games launcher|ubisoft connect|^ea app$|battle\.net|gog galaxy/i, 'careful', 'launcher'],
+  [/onedrive/i, 'careful', 'onedrive']
+]
+
+export function appHint(name: string): { hint: AppHint; why: string } | null {
+  for (const [re, hint, why] of APP_RULES) if (re.test(name)) return { hint, why }
+  return null
+}
+
+const NOT_GAMES = /blender|obs studio|wallpaper engine|soundpad|aseprite|rpg maker|sdk|launcher|social club|redistributable|dedicated server|editor/i
+const GAME_PUBLISHERS =
+  /rockstar|valve|ubisoft|electronic arts|frontier|bethesda|cd projekt|riot|blizzard|activision|2k games|bandai|capcom|square enix|sega|paradox|mojang|krafton|rare ltd|red barrels|wargaming|gaijin|hoyoverse|mihoyo|techland|devolver|team17|warner bros/i
+const GAME_NAMES = /roblox|minecraft|grand theft|counter-strike|dota|fortnite|valorant|league of legends|pubg|apex legends|warzone|genshin|world of tanks|war thunder/i
+
+export function isGame(a: { kind: string; name: string; publisher: string | null; location: string | null }): boolean {
+  if (NOT_GAMES.test(a.name)) return false
+  if (a.kind === 'steam' || a.kind === 'epic') return true
+  if (a.location && /(games?|steamapps|xboxgames)\\/i.test(`${a.location}\\`)) return true
+  return GAME_PUBLISHERS.test(a.publisher ?? '') || GAME_NAMES.test(a.name)
+}
+
+// ---- disk map: what well-known big things are
+
+export function mapHint(path: string): string | null {
+  const n = path.toLowerCase()
+  if (/^[a-z]:\\hiberfil\.sys$/.test(n)) return 'hiberfil'
+  if (/^[a-z]:\\(pagefile|swapfile)\.sys$/.test(n)) return 'pagefile'
+  if (/^[a-z]:\\windows\.old$/.test(n)) return 'windowsOld'
+  if (/^[a-z]:\\(amd|nvidia|intel)$/.test(n)) return 'drivers'
+  if (/\\(steamapps|steamlibrary)$/.test(n)) return 'steam'
+  if (/^[a-z]:\\\$recycle\.bin$/.test(n)) return 'recycle'
+  if (/^[a-z]:\\system volume information$/.test(n)) return 'restore'
+  if (/\\windows\\winsxs$/.test(n)) return 'winsxs'
+  if (/\\appdata\\local\\temp$|^[a-z]:\\windows\\temp$/.test(n)) return 'temp'
+  return null
+}

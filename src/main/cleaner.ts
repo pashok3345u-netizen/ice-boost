@@ -199,6 +199,13 @@ foreach ($c in $cats) {
 `
 }
 
+/** Bytes in the Recycle Bin (all drives). */
+export async function recycleSize(): Promise<number> {
+  const out = await taskPs.run(`${HELPERS}
+[int64](Get-RecycleFiles | Measure-Object Length -Sum).Sum`)
+  return Number(out.trim()) || 0
+}
+
 /** Dev self-test only: cleans one throwaway folder with the real cleaning script. */
 export async function _cleanFolder(dir: string): Promise<CleanResult> {
   const cat: Category = { id: 'test', admin: false, defaultOn: false, minAgeHours: 0, groups: [{ label: 'test', paths: [dir] }] }

@@ -32,8 +32,8 @@ export function useHealth(): { score: number; issues: Issue[]; ready: boolean } 
     if (live && live.diskTotal > 0) {
       const ratio = live.diskFree / live.diskTotal
       const text = t('dash.issue.diskLow', { drive, free: fmtBytes(live.diskFree, lang) })
-      if (ratio < 0.1) issues.push({ key: 'disk', text, penalty: 25, page: 'cleaner' })
-      else if (ratio < 0.2) issues.push({ key: 'disk', text, penalty: 12, page: 'cleaner' })
+      if (ratio < 0.1) issues.push({ key: 'disk', text, penalty: 25, page: 'space' })
+      else if (ratio < 0.2) issues.push({ key: 'disk', text, penalty: 12, page: 'space' })
     }
     if (junk) {
       const total = junk.filter((j) => j.defaultOn).reduce((s, j) => s + (j.size ?? 0), 0)

@@ -1,11 +1,7 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
 import { AnimatePresence, motion } from 'motion/react'
-import {
-  ArrowLeft, Boxes, CircleCheck, Gauge, List, CircuitBoard, Cpu, Fan, Gpu as GpuIcon, HardDrive, MemoryStick, MousePointerClick, OctagonAlert,
-  PcCase, Plug, RotateCcw, TriangleAlert, Undo2
-} from 'lucide-react'
+import { ArrowLeft, Boxes, CircleCheck, Columns2, Gauge, List, MousePointerClick, OctagonAlert, PcCase, RotateCcw, Sparkles, TriangleAlert, Undo2 } from 'lucide-react'
 import { useStore } from '../store'
 import { Badge, Button, Checkbox, CountUp, PageHeader, Spinner, cx } from '../ui'
 import { buildFromSystem, options, SLOTS, type Build, type Part, type Slot } from '../stand/catalog'
@@ -13,109 +9,22 @@ import {
   buyPrice, checkBuild, partAt, picks, resale, samePart, upgradeCost, withPart, type BuyMode, type Issue
 } from '../stand/check'
 import { PcScene, samePick, type Pick } from '../stand/Scene'
-import { FpsPanel } from '../stand/FpsPanel'
-import { calibrationFor, gain, loadMeasures, pcKey, resFromScreen, saveMeasures, type Calibration, type Measure, type Preset, type Res } from '../stand/games'
+import { FpsPanel, useInstalledGames } from '../stand/FpsPanel'
+import { AdvisorPanel } from '../stand/AdvisorPanel'
+import { Compare } from '../stand/Compare'
+import { ICON, IssueLine, partName, partSpec, rub } from '../stand/names'
+import { calibrationFor, gain, GAMES, loadMeasures, pcKey, resFromScreen, saveMeasures, type Calibration, type Measure, type Preset, type Res } from '../stand/games'
 
-const ICON: Record<Slot, ReactNode> = {
-  cpu: <Cpu className="size-[18px]" />,
-  cooler: <Fan className="size-[18px]" />,
-  gpu: <GpuIcon className="size-[18px]" />,
-  ram: <MemoryStick className="size-[18px]" />,
-  mobo: <CircuitBoard className="size-[18px]" />,
-  storage: <HardDrive className="size-[18px]" />,
-  psu: <Plug className="size-[18px]" />,
-  case: <PcCase className="size-[18px]" />
-}
-
-function size(gb: number, t: TFunction): string {
-  return gb >= 1000 ? t('stand.tb', { v: +(gb / 1000).toFixed(1) }) : t('stand.gb', { v: gb })
-}
-
-export function rub(v: number, lang: string): string {
-  return `${Math.round(v).toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US')} ₽`
-}
-
-export function partName(p: Part, t: TFunction): string {
-  if (p.name) return p.name
-  switch (p.slot) {
-    case 'cooler':
-      return t('stand.name.box')
-    case 'ram':
-      return t('stand.name.ram', { ddr: p.ddr ?? 4, gb: p.gb ?? 0 })
-    case 'psu':
-      return t('stand.name.psu', { w: p.watt ?? 0 })
-    case 'storage':
-      return t(`stand.name.${p.disk ?? 'sata'}`, { size: size(p.gb ?? 0, t) })
-    default:
-      return '—'
-  }
-}
-
-export function partSpec(p: Part, t: TFunction): string {
-  const bits: string[] = []
-  switch (p.slot) {
-    case 'cpu':
-      if (p.cores) bits.push(t('stand.spec.cores', { count: p.cores }), t('stand.spec.threads', { count: p.threads ?? p.cores }))
-      if (p.ghz) bits.push(t('stand.spec.ghz', { v: p.ghz }))
-      if (p.socket) bits.push(p.socket)
-      break
-    case 'gpu':
-      if (p.vram) bits.push(t('stand.spec.vram', { v: p.vram }))
-      bits.push(t('stand.spec.fans', { count: p.fans ?? 2 }))
-      break
-    case 'ram':
-      bits.push(t('stand.spec.sticks', { n: p.sticks ?? 2, per: Math.round((p.gb ?? 0) / (p.sticks || 1)), ddr: p.ddr ?? 4 }))
-      if (p.mhz) bits.push(t('stand.spec.mhz', { v: p.mhz }))
-      break
-    case 'cooler':
-      bits.push(t(`stand.spec.${p.cooler ?? 'tower'}`))
-      if (p.cool) bits.push(t('stand.spec.cool', { v: p.cool }))
-      break
-    case 'mobo':
-      if (p.chipset) bits.push(t('stand.spec.chipset', { v: p.chipset }))
-      if (p.socket) bits.push(t('stand.spec.socket', { v: p.socket }))
-      if (p.ddr) bits.push(`DDR${p.ddr}`)
-      break
-    case 'storage':
-      bits.push(t(`stand.kind.${p.disk ?? 'sata'}`))
-      if (p.name) bits.push(size(p.gb ?? 0, t))
-      break
-    case 'psu':
-      if (p.name) bits.push(t('stand.spec.watt', { v: p.watt }))
-      break
-    case 'case':
-      bits.push(t('stand.spec.case'))
-      break
-  }
-  return bits.join(' · ')
-}
 
 // the edited build and the money settings stay while you visit other pages
 let draftKeep: Build | null = null
 let modeKeep: BuyMode = 'new'
 let sellKeep = true
-let tabKeep: 'parts' | 'fps' = 'parts'
+type Tab = 'parts' | 'fps' | 'advice'
+let tabKeep: Tab = 'parts'
 let resKeep: Res | null = null
 let presetKeep: Preset = 'high'
 
-function IssueLine({ issue, onClick }: { issue: Issue; onClick?: () => void }): ReactNode {
-  const { t } = useTranslation()
-  const bad = issue.level === 'bad'
-  return (
-    <button
-      onClick={onClick}
-      disabled={!onClick}
-      className={cx(
-        'flex w-full items-start gap-2 rounded-xl border px-3 py-2 text-left text-xs leading-relaxed transition-colors',
-        bad ? 'border-bad/40 bg-bad/10 text-bad' : 'border-warn/40 bg-warn/10 text-warn',
-        onClick && (bad ? 'hover:bg-bad/20' : 'hover:bg-warn/20')
-      )}
-    >
-      {bad ? <OctagonAlert className="mt-px size-3.5 shrink-0" /> : <TriangleAlert className="mt-px size-3.5 shrink-0" />}
-      <span>{t(`stand.issue.${issue.id}`, issue.vars)}</span>
-    </button>
-  )
-}
 
 export function Stand(): ReactNode {
   const { t, i18n } = useTranslation()
@@ -133,6 +42,9 @@ export function Stand(): ReactNode {
   const [hover, setHover] = useState<Pick | null>(null)
   const [exploded, setExploded] = useState(false)
   const [ready, setReady] = useState(false)
+  const [compareOpen, setCompareOpen] = useState(false)
+  const installed = useInstalledGames()
+  const focus = useMemo(() => GAMES.filter((g) => installed?.some((n) => g.match.test(n))).map((g) => g.id), [installed])
   const onReady = useCallback(() => setReady(true), [])
 
   const setDraft = (b: Build | null): void => {
@@ -147,7 +59,7 @@ export function Stand(): ReactNode {
     sellKeep = v
     setSellState(v)
   }
-  const setTab = (v: 'parts' | 'fps'): void => {
+  const setTab = (v: Tab): void => {
     tabKeep = v
     setTabState(v)
   }
@@ -194,9 +106,14 @@ export function Stand(): ReactNode {
         actions={
           <>
             {changed && (
-              <Button icon={<RotateCcw className="size-4" />} onClick={() => setDraft(null)}>
-                {t('stand.reset')}
-              </Button>
+              <>
+                <Button icon={<Columns2 className="size-4" />} onClick={() => setCompareOpen(true)}>
+                  {t('stand.compare.open')}
+                </Button>
+                <Button icon={<RotateCcw className="size-4" />} onClick={() => setDraft(null)}>
+                  {t('stand.reset')}
+                </Button>
+              </>
             )}
             <Button
               variant={exploded ? 'soft' : 'primary'}
@@ -297,7 +214,7 @@ export function Stand(): ReactNode {
                 className="flex min-h-0 flex-1 flex-col"
               >
                 <div className="flex gap-1 px-4 pt-4 pb-3">
-                  {(['parts', 'fps'] as const).map((x) => (
+                  {(['parts', 'fps', 'advice'] as const).map((x) => (
                     <button
                       key={x}
                       onClick={() => setTab(x)}
@@ -309,12 +226,31 @@ export function Stand(): ReactNode {
                       {tab === x && (
                         <motion.span layoutId="stand-tab" className="absolute inset-0 rounded-lg border border-teal/50 bg-teal/20" />
                       )}
-                      <span className="relative">{x === 'parts' ? <List className="size-3.5" /> : <Gauge className="size-3.5" />}</span>
+                      <span className="relative">
+                        {x === 'parts' ? <List className="size-3.5" /> : x === 'fps' ? <Gauge className="size-3.5" /> : <Sparkles className="size-3.5" />}
+                      </span>
                       <span className="relative">{t(`stand.tab.${x}`)}</span>
                     </button>
                   ))}
                 </div>
-                {tab === 'fps' && build ? (
+                {tab === 'advice' && mine ? (
+                  <AdvisorPanel
+                    mine={mine}
+                    draft={draft}
+                    mode={mode}
+                    sellOld={sellOld}
+                    res={res}
+                    preset={preset}
+                    cal={cal}
+                    onMode={setMode}
+                    onSell={setSell}
+                    onTry={(b) => {
+                      setDraft(b)
+                      setExploded(false)
+                    }}
+                    onCompare={() => setCompareOpen(true)}
+                  />
+                ) : tab === 'fps' && build ? (
                   <FpsPanel
                     build={build}
                     before={changed ? mine : null}
@@ -392,7 +328,8 @@ export function Stand(): ReactNode {
           </AnimatePresence>
 
           {/* money: what the upgrade costs, or what the PC is worth now */}
-          {build && cost && (
+          {/* the advice cards show their own money, the panel needs the room */}
+          {build && cost && !(tab === 'advice' && !pick) && (
             <div className="border-t border-line/70 bg-deep/40 px-5 py-4">
               {changed ? (
                 <>
@@ -447,6 +384,20 @@ export function Stand(): ReactNode {
           )}
         </aside>
       </div>
+      {mine && build && changed && (
+        <Compare
+          open={compareOpen}
+          onClose={() => setCompareOpen(false)}
+          mine={mine}
+          build={build}
+          mode={mode}
+          sellOld={sellOld}
+          res={res}
+          preset={preset}
+          cal={cal}
+          focus={focus}
+        />
+      )}
     </div>
   )
 }

@@ -255,7 +255,7 @@ export function Bar({ value, color = C.ice, height = 6 }: { value: number; color
   )
 }
 
-export function Modal({ open, onClose, children, wide }: { open: boolean; onClose?: () => void; children: ReactNode; wide?: boolean }): ReactNode {
+export function Modal({ open, onClose, children, wide, xl }: { open: boolean; onClose?: () => void; children: ReactNode; wide?: boolean; xl?: boolean }): ReactNode {
   useEffect(() => {
     if (!open || !onClose) return
     const h = (e: KeyboardEvent): void => {
@@ -279,7 +279,7 @@ export function Modal({ open, onClose, children, wide }: { open: boolean; onClos
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-            className={cx('card max-w-[92vw] rounded-2xl border border-line bg-panel p-6 shadow-2xl', wide ? 'w-[560px]' : 'w-[460px]')}
+            className={cx('card max-w-[92vw] rounded-2xl border border-line bg-panel p-6 shadow-2xl', xl ? 'w-[820px]' : wide ? 'w-[560px]' : 'w-[460px]')}
             onClick={(e) => e.stopPropagation()}
           >
             {children}

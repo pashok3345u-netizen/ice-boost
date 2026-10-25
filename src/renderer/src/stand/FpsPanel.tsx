@@ -21,6 +21,19 @@ function installedGames(): Promise<string[]> {
   return installedPromise
 }
 
+/** names of installed games (null while loading) */
+export function useInstalledGames(): string[] | null {
+  const [installed, setInstalled] = useState<string[] | null>(null)
+  useEffect(() => {
+    let alive = true
+    void installedGames().then((list) => alive && setInstalled(list))
+    return () => {
+      alive = false
+    }
+  }, [])
+  return installed
+}
+
 export function Segmented<T extends string>({
   value, items, onChange
 }: {
@@ -127,21 +140,13 @@ export function FpsPanel({
   const { t, i18n } = useTranslation()
   const ru = i18n.language === 'ru'
   const [cat, setCatState] = useState<Cat>(catKeep)
-  const [installed, setInstalled] = useState<string[] | null>(null)
+  const installed = useInstalledGames()
   const [editing, setEditing] = useState<string | null>(null)
   const [howTo, setHowTo] = useState(false)
   const setCat = (c: Cat): void => {
     catKeep = c
     setCatState(c)
   }
-
-  useEffect(() => {
-    let alive = true
-    void installedGames().then((list) => alive && setInstalled(list))
-    return () => {
-      alive = false
-    }
-  }, [])
 
   const mineIds = useMemo(
     () => new Set(GAMES.filter((g) => installed?.some((n) => g.match.test(n))).map((g) => g.id)),
